@@ -16,12 +16,14 @@ final class TextDiffResult implements JsonSerializable
     /**
      * @param list<DiffLine> $lines
      * @param list<Hunk> $hunks
+     * @param list<ModifiedLinePair> $pairs
      *
      * @internal Results are created by Diff::text().
      */
     public function __construct(
         private array $lines,
         private array $hunks,
+        private array $pairs,
         private bool $oldEndsWithNewline,
         private bool $newEndsWithNewline,
     ) {
@@ -74,13 +76,26 @@ final class TextDiffResult implements JsonSerializable
     }
 
     /**
-     * @return array{added: int, removed: int, unchanged: int}
+     * Removed and added lines that look alike, in order; empty when pairing is turned off
+     *
+     * @return list<ModifiedLinePair>
+     */
+    public function modifiedPairs(): array
+    {
+        return $this->pairs;
+    }
+
+    /**
+     * Line counts; a modified pair still counts once as removed and once as added
+     *
+     * @return array{added: int, removed: int, modified: int, unchanged: int}
      */
     public function stats(): array
     {
         return [
             'added' => count($this->addedLines()),
             'removed' => count($this->removedLines()),
+            'modified' => count($this->pairs),
             'unchanged' => count($this->ofType(ChangeType::UNCHANGED)),
         ];
     }
@@ -95,7 +110,7 @@ final class TextDiffResult implements JsonSerializable
     }
 
     /**
-     * @return array{stats: array{added: int, removed: int, unchanged: int}, old_ends_with_newline: bool, new_ends_with_newline: bool, hunks: list<array{old_start: int, old_length: int, new_start: int, new_length: int, lines: list<array{type: string, content: string, old_line: int|null, new_line: int|null}>}>}
+     * @return array{stats: array{added: int, removed: int, modified: int, unchanged: int}, old_ends_with_newline: bool, new_ends_with_newline: bool, hunks: list<array{old_start: int, old_length: int, new_start: int, new_length: int, lines: list<array{type: string, content: string, old_line: int|null, new_line: int|null}>}>, modified: list<array{old_line: int|null, new_line: int|null}>}
      */
     public function toArray(): array
     {
@@ -104,11 +119,12 @@ final class TextDiffResult implements JsonSerializable
             'old_ends_with_newline' => $this->oldEndsWithNewline,
             'new_ends_with_newline' => $this->newEndsWithNewline,
             'hunks' => array_map(static fn (Hunk $hunk): array => $hunk->toArray(), $this->hunks),
+            'modified' => array_map(static fn (ModifiedLinePair $pair): array => $pair->toArray(), $this->pairs),
         ];
     }
 
     /**
-     * @return array{stats: array{added: int, removed: int, unchanged: int}, old_ends_with_newline: bool, new_ends_with_newline: bool, hunks: list<array{old_start: int, old_length: int, new_start: int, new_length: int, lines: list<array{type: string, content: string, old_line: int|null, new_line: int|null}>}>}
+     * @return array{stats: array{added: int, removed: int, modified: int, unchanged: int}, old_ends_with_newline: bool, new_ends_with_newline: bool, hunks: list<array{old_start: int, old_length: int, new_start: int, new_length: int, lines: list<array{type: string, content: string, old_line: int|null, new_line: int|null}>}>, modified: list<array{old_line: int|null, new_line: int|null}>}
      */
     public function jsonSerialize(): array
     {

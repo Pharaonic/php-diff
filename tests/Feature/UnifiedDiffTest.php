@@ -57,7 +57,7 @@ it('serializes hunks to arrays and JSON', function () {
     $array = $result->toArray();
 
     expect($array)->toMatchArray([
-        'stats' => ['added' => 1, 'removed' => 1, 'unchanged' => 1],
+        'stats' => ['added' => 1, 'removed' => 1, 'modified' => 0, 'unchanged' => 1],
         'old_ends_with_newline' => false,
         'new_ends_with_newline' => true,
     ])
