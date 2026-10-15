@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pharaonic\Diff;
 
 use JsonSerializable;
+use Pharaonic\Diff\Renderer\HtmlRenderer;
 use Pharaonic\Diff\Renderer\UnifiedRenderer;
 
 /**
@@ -107,6 +108,18 @@ final class TextDiffResult implements JsonSerializable
     public function toUnified(string $oldLabel = 'before', string $newLabel = 'after'): string
     {
         return UnifiedRenderer::render($this, $oldLabel, $newLabel);
+    }
+
+    /**
+     * A GitHub-style HTML table of the hunks, or an empty string when the texts are equal
+     *
+     * Every piece of text is escaped. Style it with resources/diff.css or your own rules for the
+     * ph-diff-* classes; line numbers and +/- markers are in data-line-number and data-marker
+     * attributes, so copying the code does not copy them.
+     */
+    public function toHtml(): string
+    {
+        return HtmlRenderer::render($this);
     }
 
     /**

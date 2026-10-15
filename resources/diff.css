@@ -1,0 +1,123 @@
+/*
+ * Optional GitHub-style styles for TextDiffResult::toHtml() from pharaonic/php-diff.
+ * Override the custom properties to theme it; dark colors follow prefers-color-scheme.
+ */
+.ph-diff {
+  --ph-diff-font: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --ph-diff-text: #1f2328;
+  --ph-diff-muted: #59636e;
+  --ph-diff-background: #ffffff;
+  --ph-diff-border: #d1d9e0;
+  --ph-diff-hunk-background: #ddf4ff;
+  --ph-diff-added-background: #dafbe1;
+  --ph-diff-added-number-background: #aceebb;
+  --ph-diff-added-inline: #aceebb;
+  --ph-diff-removed-background: #ffebe9;
+  --ph-diff-removed-number-background: #ffcecb;
+  --ph-diff-removed-inline: #ffcecb;
+
+  width: 100%;
+  border: 1px solid var(--ph-diff-border);
+  border-collapse: collapse;
+  border-spacing: 0;
+  background: var(--ph-diff-background);
+  color: var(--ph-diff-text);
+  font: 12px/20px var(--ph-diff-font);
+  tab-size: 4;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ph-diff {
+    --ph-diff-text: #f0f6fc;
+    --ph-diff-muted: #9198a1;
+    --ph-diff-background: #0d1117;
+    --ph-diff-border: #3d444d;
+    --ph-diff-hunk-background: #121d2f;
+    --ph-diff-added-background: #12261e;
+    --ph-diff-added-number-background: #1b4721;
+    --ph-diff-added-inline: #2e6f40;
+    --ph-diff-removed-background: #25171c;
+    --ph-diff-removed-number-background: #542426;
+    --ph-diff-removed-inline: #8e3a3c;
+  }
+}
+
+.ph-diff td {
+  padding: 0 10px;
+  vertical-align: top;
+}
+
+.ph-diff-hunk-header {
+  background: var(--ph-diff-hunk-background);
+  color: var(--ph-diff-muted);
+}
+
+.ph-diff .ph-diff-hunk-header-text {
+  padding: 4px 10px;
+}
+
+.ph-diff-number {
+  width: 1%;
+  min-width: 40px;
+  color: var(--ph-diff-muted);
+  text-align: right;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ph-diff-number::before {
+  content: attr(data-line-number);
+}
+
+.ph-diff-code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ph-diff-marker::before {
+  content: attr(data-marker);
+  display: inline-block;
+  width: 1.5ch;
+  margin-left: -0.5ch;
+  user-select: none;
+}
+
+.ph-diff-line--context {
+  background: var(--ph-diff-background);
+}
+
+.ph-diff-line--added {
+  background: var(--ph-diff-added-background);
+}
+
+.ph-diff-line--added .ph-diff-number {
+  background: var(--ph-diff-added-number-background);
+}
+
+.ph-diff-line--removed {
+  background: var(--ph-diff-removed-background);
+}
+
+.ph-diff-line--removed .ph-diff-number {
+  background: var(--ph-diff-removed-number-background);
+}
+
+.ph-diff-inline--added,
+.ph-diff-inline--removed {
+  border-radius: 3px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ph-diff-inline--added {
+  background: var(--ph-diff-added-inline);
+}
+
+.ph-diff-inline--removed {
+  background: var(--ph-diff-removed-inline);
+}
+
+.ph-diff-no-newline .ph-diff-code {
+  color: var(--ph-diff-muted);
+  font-style: italic;
+}
