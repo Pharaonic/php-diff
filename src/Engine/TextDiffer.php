@@ -8,6 +8,7 @@ use Pharaonic\Diff\Algorithm\Myers;
 use Pharaonic\Diff\ChangeType;
 use Pharaonic\Diff\DiffLine;
 use Pharaonic\Diff\Exceptions\InputLimitExceededException;
+use Pharaonic\Diff\Text\Hunks;
 use Pharaonic\Diff\Text\Lines;
 use Pharaonic\Diff\TextDiffOptions;
 use Pharaonic\Diff\TextDiffResult;
@@ -58,7 +59,7 @@ final class TextDiffer
             }
         }
 
-        return new TextDiffResult($lines, $old->endsWithNewline, $new->endsWithNewline);
+        return new TextDiffResult($lines, Hunks::build($lines, $this->options->contextLines()), $old->endsWithNewline, $new->endsWithNewline);
     }
 
     private function split(string $text, string $side): Lines

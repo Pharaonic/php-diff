@@ -12,11 +12,16 @@ final class TextDiffResult
 {
     /**
      * @param list<DiffLine> $lines
+     * @param list<Hunk> $hunks
      *
      * @internal Results are created by Diff::text().
      */
-    public function __construct(private array $lines, private bool $oldEndsWithNewline, private bool $newEndsWithNewline)
-    {
+    public function __construct(
+        private array $lines,
+        private array $hunks,
+        private bool $oldEndsWithNewline,
+        private bool $newEndsWithNewline,
+    ) {
     }
 
     public function hasChanges(): bool
@@ -36,6 +41,17 @@ final class TextDiffResult
     public function lines(): array
     {
         return $this->lines;
+    }
+
+    /**
+     * The changes with TextDiffOptions::context() unchanged lines around them; none when the texts
+     * are equal
+     *
+     * @return list<Hunk>
+     */
+    public function hunks(): array
+    {
+        return $this->hunks;
     }
 
     /**
