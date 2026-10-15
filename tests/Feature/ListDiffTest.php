@@ -2,26 +2,9 @@
 
 declare(strict_types=1);
 
-use Pharaonic\Diff\Change;
 use Pharaonic\Diff\Diff;
 use Pharaonic\Diff\DiffOptions;
 use Pharaonic\Diff\ListStrategy;
-
-/**
- * Each change as "type path", with "old->new" when a list item changed its index
- *
- * @return list<string>
- */
-function moves(Pharaonic\Diff\DiffResult $result): array
-{
-    return array_map(static function (Change $change): string {
-        $old = $change->oldPath()?->toDot();
-        $new = $change->newPath()?->toDot();
-        $where = $old !== null && $new !== null && $old !== $new ? "{$old}->{$new}" : $change->path()->toDot();
-
-        return $change->type() . ' ' . $where . ($change->isAggregate() ? ' [aggregate]' : '');
-    }, $result->changes());
-}
 
 it('aligns sequences so an insertion or removal does not cascade', function (array $before, array $after, array $expected) {
     expect(summary(Diff::between($before, $after)))->toBe($expected);

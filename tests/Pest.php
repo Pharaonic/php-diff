@@ -17,3 +17,19 @@ function summary(DiffResult $result): array
         $result->changes(),
     );
 }
+
+/**
+ * Each change as "type path", with "old->new" when a list item changed its index
+ *
+ * @return list<string>
+ */
+function moves(DiffResult $result): array
+{
+    return array_map(static function (Change $change): string {
+        $old = $change->oldPath()?->toDot();
+        $new = $change->newPath()?->toDot();
+        $where = $old !== null && $new !== null && $old !== $new ? "{$old}->{$new}" : $change->path()->toDot();
+
+        return $change->type() . ' ' . $where . ($change->isAggregate() ? ' [aggregate]' : '');
+    }, $result->changes());
+}
