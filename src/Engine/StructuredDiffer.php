@@ -697,15 +697,20 @@ final class StructuredDiffer
      */
     private function change(string $type, ?array $oldPath, ?array $newPath, mixed $before, mixed $after, bool $aggregate = false): Change
     {
+        // A value is redacted as a whole when either of its paths is redacted.
+        $redacted = ($oldPath !== null && $this->snapshot->redacts($oldPath))
+            || ($newPath !== null && $this->snapshot->redacts($newPath));
+
         return new Change(
             $type,
             $oldPath === null ? null : Path::fromSegments($oldPath),
             $newPath === null ? null : Path::fromSegments($newPath),
             $oldPath !== null,
-            $oldPath === null ? null : $this->snapshot->take($before, $oldPath),
+            $oldPath === null ? null : ($redacted ? Change::REDACTED : $this->snapshot->take($before, $oldPath)),
             $newPath !== null,
-            $newPath === null ? null : $this->snapshot->take($after, $newPath),
+            $newPath === null ? null : ($redacted ? Change::REDACTED : $this->snapshot->take($after, $newPath)),
             $aggregate,
+            $redacted,
         );
     }
 }

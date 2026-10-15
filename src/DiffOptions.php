@@ -96,7 +96,8 @@ final class DiffOptions
     }
 
     /**
-     * Compare these values but store Change::REDACTED instead of them in the result
+     * Compare these values but store Change::REDACTED instead of them in the result, including
+     * inside the values of their parents and of added or removed containers
      *
      * @param string|list<string> $paths
      */

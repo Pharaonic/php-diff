@@ -110,7 +110,8 @@ final class Change
     }
 
     /**
-     * Whether the values were replaced with Change::REDACTED
+     * Whether the values were replaced with Change::REDACTED as a whole; redacted values inside a
+     * container are replaced without setting this flag
      */
     public function isRedacted(): bool
     {
