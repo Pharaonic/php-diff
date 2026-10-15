@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - develop
+      - "8.*.x"
+  pull_request:
+    branches:
+      - develop
+      - "8.*.x"
+  workflow_dispatch:
+
+concurrency:
+  group: "build-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Every branch declares exactly one PHP minor (">=8.N <8.N+1"), so the
+      # version comes from composer.json. This works on develop and feature
+      # branches as well as on the 8.N.x lines.
+      - name: Detect target PHP version
+        id: php
+        shell: bash
+        run: |
+          constraint="$(jq -r '.require.php' composer.json)"
+
+          if [[ ! "$constraint" =~ ^\>=(8\.[0-9]+) ]]; then
+            echo "Cannot read the target PHP minor from require.php: $constraint" >&2
+            exit 1
+          fi
+
+          echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "${{ steps.php.outputs.version }}"
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Check
+        run: composer check

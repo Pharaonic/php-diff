@@ -1,0 +1,74 @@
+{
+  "name": "pharaonic/php-diff",
+  "description": "Semantic structured diffs and GitHub-style text diffs for PHP: added, removed, modified and moved values with paths, identity-aware lists, redaction, hunks, unified patches and HTML.",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "php",
+    "diff",
+    "compare",
+    "structured diff",
+    "array diff",
+    "text diff",
+    "unified diff",
+    "myers",
+    "change detection",
+    "pharaonic"
+  ],
+  "authors": [
+    {
+      "name": "Moamen Eltouny (Raggi)",
+      "email": "raggigroup@gmail.com"
+    }
+  ],
+  "homepage": "https://github.com/Pharaonic/php-diff",
+  "support": {
+    "docs": "https://pharaonic.dev/packages/php/diff",
+    "issues": "https://github.com/Pharaonic/php-diff/issues",
+    "source": "https://github.com/Pharaonic/php-diff",
+    "security": "https://github.com/Pharaonic/php-diff/security/policy"
+  },
+  "require": {
+    "php": ">=8.0 <8.1"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.5",
+    "pestphp/pest": "^1.23",
+    "phpstan/phpstan": "^2.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Pharaonic\\Diff\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Pharaonic\\Diff\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "@php vendor/bin/pest",
+    "analyse": "@php vendor/bin/phpstan analyse --memory-limit=1G",
+    "format": "@php vendor/bin/pint",
+    "format:check": "@php vendor/bin/pint --test",
+    "security": "@composer audit",
+    "check": [
+      "@composer validate --strict",
+      "@format:check",
+      "@analyse",
+      "@test",
+      "@security"
+    ]
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    },
+    "audit": {
+      "abandoned": "report"
+    },
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
