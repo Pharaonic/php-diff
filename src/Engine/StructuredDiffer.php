@@ -13,6 +13,7 @@ use Pharaonic\Diff\Exceptions\MaximumDepthExceededException;
 use Pharaonic\Diff\Exceptions\UnsupportedValueException;
 use Pharaonic\Diff\Path;
 use Pharaonic\Diff\Support\Arrays;
+use Pharaonic\Diff\Support\PathFilter;
 
 /**
  * Compares two structured values and collects their changes in traversal order
@@ -34,8 +35,11 @@ final class StructuredDiffer
      */
     private array $changes = [];
 
+    private PathFilter $filter;
+
     public function __construct(private DiffOptions $options)
     {
+        $this->filter = new PathFilter($options);
     }
 
     /**
@@ -44,7 +48,10 @@ final class StructuredDiffer
     public function diff(mixed $before, mixed $after): array
     {
         $this->changes = [];
-        $this->compare($before, $after, []);
+
+        if ($this->filter->state([]) !== PathFilter::EXCLUDED) {
+            $this->compare($before, $after, []);
+        }
 
         return $this->changes;
     }
@@ -64,17 +71,13 @@ final class StructuredDiffer
                 return false;
             }
 
-            $this->modified($path, $before, $after);
-
-            return true;
+            return $this->modified($path, $before, $after);
         }
 
         $kind = $this->containerKind($beforeKind, $afterKind);
 
         if ($kind === null) {
-            $this->modified($path, $before, $after);
-
-            return true;
+            return $this->modified($path, $before, $after);
         }
 
         if ($kind === self::EMPTY) {
@@ -90,7 +93,7 @@ final class StructuredDiffer
             ? $this->compareMap($before, $after, $path)
             : $this->compareList($before, $after, $path);
 
-        if ($changed && $path !== []) {
+        if ($changed && $path !== [] && $this->filter->reports($path, $path)) {
             array_splice($this->changes, $position, 0, [$this->change(ChangeType::MODIFIED, $path, $path, $before, $after, true)]);
         }
 
@@ -111,18 +114,18 @@ final class StructuredDiffer
         foreach ($after as $key => $value) {
             $child = [...$path, $key];
 
-            if (array_key_exists($key, $before)) {
-                $changed = $this->compare($before[$key], $value, $child) || $changed;
-            } else {
-                $this->added($child, $value);
-                $changed = true;
+            if ($this->filter->state($child) === PathFilter::EXCLUDED) {
+                continue;
             }
+
+            $changed = (array_key_exists($key, $before)
+                ? $this->compare($before[$key], $value, $child)
+                : $this->added($child, $value)) || $changed;
         }
 
         foreach ($before as $key => $value) {
             if (! array_key_exists($key, $after)) {
-                $this->removed([...$path, $key], $value);
-                $changed = true;
+                $changed = $this->removed([...$path, $key], $value) || $changed;
             }
         }
 
@@ -142,15 +145,17 @@ final class StructuredDiffer
         for ($index = 0; $index < $length; $index++) {
             $child = [...$path, $index];
 
-            if (! array_key_exists($index, $after)) {
-                $this->removed($child, $before[$index]);
-            } elseif (! array_key_exists($index, $before)) {
-                $this->added($child, $after[$index]);
-            } elseif (! $this->compare($before[$index], $after[$index], $child)) {
+            if ($this->filter->state($child) === PathFilter::EXCLUDED) {
                 continue;
             }
 
-            $changed = true;
+            if (! array_key_exists($index, $after)) {
+                $changed = $this->removed($child, $before[$index]) || $changed;
+            } elseif (! array_key_exists($index, $before)) {
+                $changed = $this->added($child, $after[$index]) || $changed;
+            } else {
+                $changed = $this->compare($before[$index], $after[$index], $child) || $changed;
+            }
         }
 
         return $changed;
@@ -223,27 +228,50 @@ final class StructuredDiffer
     /**
      * @param list<int|string> $path
      */
-    private function added(array $path, mixed $value): void
+    private function added(array $path, mixed $value): bool
     {
-        $this->kind($value, $path);
-        $this->changes[] = $this->change(ChangeType::ADDED, null, $path, null, $value);
+        return $this->emit(ChangeType::ADDED, null, $path, null, $value);
     }
 
     /**
      * @param list<int|string> $path
      */
-    private function removed(array $path, mixed $value): void
+    private function removed(array $path, mixed $value): bool
     {
-        $this->kind($value, $path);
-        $this->changes[] = $this->change(ChangeType::REMOVED, $path, null, $value, null);
+        return $this->emit(ChangeType::REMOVED, $path, null, $value, null);
     }
 
     /**
      * @param list<int|string> $path
      */
-    private function modified(array $path, mixed $before, mixed $after): void
+    private function modified(array $path, mixed $before, mixed $after): bool
     {
-        $this->changes[] = $this->change(ChangeType::MODIFIED, $path, $path, $before, $after);
+        return $this->emit(ChangeType::MODIFIED, $path, $path, $before, $after);
+    }
+
+    /**
+     * Record a direct change when the filters report it
+     *
+     * @param list<int|string>|null $oldPath
+     * @param list<int|string>|null $newPath
+     */
+    private function emit(string $type, ?array $oldPath, ?array $newPath, mixed $before, mixed $after): bool
+    {
+        if (! $this->filter->reports($oldPath, $newPath)) {
+            return false;
+        }
+
+        if ($oldPath !== null) {
+            $this->kind($before, $oldPath);
+        }
+
+        if ($newPath !== null) {
+            $this->kind($after, $newPath);
+        }
+
+        $this->changes[] = $this->change($type, $oldPath, $newPath, $before, $after);
+
+        return true;
     }
 
     /**

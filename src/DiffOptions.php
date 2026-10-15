@@ -81,6 +81,10 @@ final class DiffOptions
     /**
      * Report only changes at these paths and below them; ignore() still wins
      *
+     * Branches that cannot lead to these paths are not traversed. Containers above them are
+     * traversed but never reported, not even when a whole container was added, removed or
+     * changed type.
+     *
      * @param string|list<string> $paths
      */
     public function only(string|array $paths): self
