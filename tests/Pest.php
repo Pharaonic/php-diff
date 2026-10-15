@@ -33,3 +33,18 @@ function moves(DiffResult $result): array
         return $change->type() . ' ' . $where . ($change->isAggregate() ? ' [aggregate]' : '');
     }, $result->changes());
 }
+
+/**
+ * Each line as " content", "-content" or "+content", like a unified diff body
+ *
+ * @return list<string>
+ */
+function textLines(Pharaonic\Diff\TextDiffResult $result): array
+{
+    $markers = ['unchanged' => ' ', 'removed' => '-', 'added' => '+'];
+
+    return array_map(
+        static fn (Pharaonic\Diff\DiffLine $line): string => $markers[$line->type()] . $line->content(),
+        $result->lines(),
+    );
+}
