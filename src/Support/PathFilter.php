@@ -56,7 +56,7 @@ final class PathFilter
     public function state(array $path): int
     {
         foreach ($this->ignore as $pattern) {
-            if (self::covers($pattern, $path)) {
+            if (Pattern::covers($pattern, $path)) {
                 return self::EXCLUDED;
             }
         }
@@ -68,16 +68,28 @@ final class PathFilter
         $state = self::EXCLUDED;
 
         foreach ($this->only as $pattern) {
-            if (self::covers($pattern, $path)) {
+            if (Pattern::covers($pattern, $path)) {
                 return self::INCLUDED;
             }
 
-            if (count($pattern) > count($path) && self::prefixMatches($pattern, $path)) {
+            if (Pattern::leadsTo($pattern, $path)) {
                 $state = self::TRAVERSED;
             }
         }
 
         return $state;
+    }
+
+    /**
+     * Whether a value at these paths is skipped without being traversed
+     *
+     * @param list<int|string>|null $oldPath
+     * @param list<int|string>|null $newPath
+     */
+    public function skips(?array $oldPath, ?array $newPath): bool
+    {
+        return ($oldPath !== null && $this->state($oldPath) === self::EXCLUDED)
+            || ($newPath !== null && $this->state($newPath) === self::EXCLUDED);
     }
 
     /**
@@ -96,33 +108,5 @@ final class PathFilter
         }
 
         return $old === self::INCLUDED || $new === self::INCLUDED;
-    }
-
-    /**
-     * Whether the path is at or below what the pattern matches
-     *
-     * @param list<string|null> $pattern
-     * @param list<int|string> $path
-     */
-    private static function covers(array $pattern, array $path): bool
-    {
-        return count($pattern) <= count($path) && self::prefixMatches($pattern, array_slice($path, 0, count($pattern)));
-    }
-
-    /**
-     * Whether the path matches the start of the pattern
-     *
-     * @param list<string|null> $pattern
-     * @param list<int|string> $path
-     */
-    private static function prefixMatches(array $pattern, array $path): bool
-    {
-        foreach ($path as $i => $key) {
-            if ($pattern[$i] !== null && $pattern[$i] !== (string) $key) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

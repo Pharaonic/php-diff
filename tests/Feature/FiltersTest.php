@@ -15,11 +15,11 @@ it('leaves out ignored paths and everything below them', function () {
 });
 
 it('matches one segment with a wildcard', function () {
-    $before = ['users' => [['name' => 'a', 'updated_at' => 1], ['name' => 'b', 'updated_at' => 1]]];
-    $after = ['users' => [['name' => 'a', 'updated_at' => 2], ['name' => 'c', 'updated_at' => 2]]];
+    $before = ['users' => [['name' => 'a', 'age' => 1, 'updated_at' => 1], ['name' => 'b', 'age' => 1, 'updated_at' => 1]]];
+    $after = ['users' => [['name' => 'a', 'age' => 1, 'updated_at' => 2], ['name' => 'b', 'age' => 2, 'updated_at' => 2]]];
 
     expect(summary(Diff::between($before, $after, DiffOptions::create()->ignore('users.*.updated_at'))))
-        ->toBe(['modified users [aggregate]', 'modified users.1 [aggregate]', 'modified users.1.name']);
+        ->toBe(['modified users [aggregate]', 'modified users.1 [aggregate]', 'modified users.1.age']);
 });
 
 it('does not mark a parent as modified when only ignored children changed', function () {
