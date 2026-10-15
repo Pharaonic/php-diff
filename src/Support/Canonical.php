@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pharaonic\Diff\Support;
 
+use DateTimeInterface;
 use Pharaonic\Diff\DiffOptions;
 use Pharaonic\Diff\Exceptions\MaximumDepthExceededException;
 use Pharaonic\Diff\ListStrategy;
@@ -20,7 +21,7 @@ use Pharaonic\Diff\Path;
  */
 final class Canonical
 {
-    public function __construct(private DiffOptions $options, private PathFilter $filter)
+    public function __construct(private DiffOptions $options, private PathFilter $filter, private Objects $objects)
     {
     }
 
@@ -44,9 +45,33 @@ final class Canonical
 
     /**
      * @param list<int|string> $path
+     * @param list<object> $ancestors The objects being encoded around this value
      */
-    public function encode(mixed $value, array $path): string
+    public function encode(mixed $value, array $path, array $ancestors = []): string
     {
+        if (is_object($value)) {
+            $comparedAs = $this->objects->comparedAs($value);
+
+            if ($comparedAs === DateTimeInterface::class && $value instanceof DateTimeInterface) {
+                return 'd' . $value->format('U.u') . ';';
+            }
+
+            if ($comparedAs !== null) {
+                // Only the comparator knows when two such objects are equal.
+                return 'o' . spl_object_id($value) . ';';
+            }
+
+            foreach ($ancestors as $ancestor) {
+                if ($ancestor === $value) {
+                    throw UnsupportedValueException::circular(Path::fromSegments($path), $value);
+                }
+            }
+
+            $ancestors[] = $value;
+
+            return $this->encode($this->objects->normalize($value, $path), $path, $ancestors);
+        }
+
         if ($value === null) {
             return 'n;';
         }
@@ -79,14 +104,15 @@ final class Canonical
             throw MaximumDepthExceededException::limit(Path::fromSegments($path), $this->options->depthLimit());
         }
 
-        return Arrays::isList($value) ? $this->encodeList($value, $path) : $this->encodeMap($value, $path);
+        return Arrays::isList($value) ? $this->encodeList($value, $path, $ancestors) : $this->encodeMap($value, $path, $ancestors);
     }
 
     /**
      * @param list<mixed> $value
      * @param list<int|string> $path
+     * @param list<object> $ancestors
      */
-    private function encodeList(array $value, array $path): string
+    private function encodeList(array $value, array $path, array $ancestors): string
     {
         $items = [];
 
@@ -94,7 +120,7 @@ final class Canonical
             $child = [...$path, $index];
 
             if ($this->filter->state($child) !== PathFilter::EXCLUDED) {
-                $items[] = $this->encode($item, $child);
+                $items[] = $this->encode($item, $child, $ancestors);
             }
         }
 
@@ -112,8 +138,9 @@ final class Canonical
     /**
      * @param array<mixed> $value
      * @param list<int|string> $path
+     * @param list<object> $ancestors
      */
-    private function encodeMap(array $value, array $path): string
+    private function encodeMap(array $value, array $path, array $ancestors): string
     {
         uksort($value, static fn (int|string $a, int|string $b): int => strcmp((string) $a, (string) $b));
         $encoded = 'm{';
@@ -122,7 +149,7 @@ final class Canonical
             $child = [...$path, $key];
 
             if ($this->filter->state($child) !== PathFilter::EXCLUDED) {
-                $encoded .= (is_int($key) ? 'i' . $key : 's' . strlen($key) . ':' . $key) . '=' . $this->encode($item, $child);
+                $encoded .= (is_int($key) ? 'i' . $key : 's' . strlen($key) . ':' . $key) . '=' . $this->encode($item, $child, $ancestors);
             }
         }
 

@@ -16,7 +16,12 @@ final class Diff
     }
 
     /**
-     * Compare two structured values: scalars, null and arrays
+     * Compare two structured values: scalars, null, arrays and objects
+     *
+     * Objects are compared through DiffOptions::compare(), as the same instant for dates, or
+     * after normalization through DiffOptions::normalize(), jsonSerialize() or, for stdClass,
+     * their public properties. Other objects, resources, closures and generators throw an
+     * UnsupportedValueException.
      */
     public static function between(mixed $before, mixed $after, ?DiffOptions $options = null): DiffResult
     {

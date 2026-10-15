@@ -194,8 +194,8 @@ final class DiffOptions
     }
 
     /**
-     * Decide whether two instances of a class or interface are equal; a different pair is one
-     * modified change and is never compared further
+     * Decide whether two instances of a class or interface are equal; only true means equal, and
+     * a different pair is one modified change that is never compared further
      *
      * @param class-string $class
      * @param callable(object, object): bool $equals

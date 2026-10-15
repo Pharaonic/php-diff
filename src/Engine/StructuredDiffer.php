@@ -15,7 +15,9 @@ use Pharaonic\Diff\ListStrategy;
 use Pharaonic\Diff\Path;
 use Pharaonic\Diff\Support\Arrays;
 use Pharaonic\Diff\Support\Canonical;
+use Pharaonic\Diff\Support\Objects;
 use Pharaonic\Diff\Support\PathFilter;
+use Pharaonic\Diff\Support\Snapshot;
 use Pharaonic\Diff\Support\Values;
 
 /**
@@ -49,10 +51,28 @@ final class StructuredDiffer
 
     private Canonical $canonical;
 
+    private Objects $objects;
+
+    private Snapshot $snapshot;
+
+    /**
+     * The objects being compared around the current values, for each side
+     *
+     * @var list<object>
+     */
+    private array $beforeAncestors = [];
+
+    /**
+     * @var list<object>
+     */
+    private array $afterAncestors = [];
+
     public function __construct(private DiffOptions $options)
     {
         $this->filter = new PathFilter($options);
-        $this->canonical = new Canonical($options, $this->filter);
+        $this->objects = new Objects($options);
+        $this->canonical = new Canonical($options, $this->filter, $this->objects);
+        $this->snapshot = new Snapshot($options, $this->filter, $this->objects);
     }
 
     /**
@@ -61,6 +81,8 @@ final class StructuredDiffer
     public function diff(mixed $before, mixed $after): array
     {
         $this->changes = [];
+        $this->beforeAncestors = [];
+        $this->afterAncestors = [];
 
         if (! $this->filter->skips([], [])) {
             $this->compare($before, $after, [], []);
@@ -72,10 +94,61 @@ final class StructuredDiffer
     /**
      * Compare two values that both exist and report whether a change was recorded
      *
+     * A comparator that claims both values decides alone; other objects are normalized first.
+     *
      * @param list<int|string> $old
      * @param list<int|string> $new
      */
     private function compare(mixed $before, mixed $after, array $old, array $new): bool
+    {
+        $comparator = $this->objects->comparator($before, $after);
+
+        if ($comparator !== null) {
+            return $comparator($before, $after) === true ? false : $this->emit(ChangeType::MODIFIED, $old, $new, $before, $after);
+        }
+
+        $beforeDepth = count($this->beforeAncestors);
+        $afterDepth = count($this->afterAncestors);
+
+        try {
+            $before = $this->enter($before, $old, $this->beforeAncestors);
+            $after = $this->enter($after, $new, $this->afterAncestors);
+
+            return $this->compareValues($before, $after, $old, $new);
+        } finally {
+            array_splice($this->beforeAncestors, $beforeDepth);
+            array_splice($this->afterAncestors, $afterDepth);
+        }
+    }
+
+    /**
+     * Normalize an object, failing when it is already being compared further up
+     *
+     * @param list<int|string> $path
+     * @param list<object> $ancestors
+     */
+    private function enter(mixed $value, array $path, array &$ancestors): mixed
+    {
+        if (! is_object($value) || $this->objects->comparedAs($value) !== null) {
+            return $value;
+        }
+
+        foreach ($ancestors as $ancestor) {
+            if ($ancestor === $value) {
+                throw UnsupportedValueException::circular(Path::fromSegments($path), $value);
+            }
+        }
+
+        $ancestors[] = $value;
+
+        return $this->objects->normalize($value, $path);
+    }
+
+    /**
+     * @param list<int|string> $old
+     * @param list<int|string> $new
+     */
+    private function compareValues(mixed $before, mixed $after, array $old, array $new): bool
     {
         $beforeKind = $this->kind($before, $old);
         $afterKind = $this->kind($after, $new);
@@ -398,6 +471,9 @@ final class StructuredDiffer
      */
     private function pairable(mixed $before, mixed $after, array $old, array $new, bool $scalars): bool
     {
+        $before = $this->objects->normalize($before, $old);
+        $after = $this->objects->normalize($after, $new);
+
         if (! is_array($before) || ! is_array($after)) {
             return $scalars && ! is_array($before) && ! is_array($after);
         }
@@ -480,6 +556,7 @@ final class StructuredDiffer
         $indexes = [];
 
         foreach ($items as $index => $item) {
+            $item = $this->objects->normalize($item, [...$path, $index]);
             $identity = '';
 
             foreach ($keys as $key) {
@@ -562,7 +639,8 @@ final class StructuredDiffer
             return Arrays::isList($value) ? self::LIST : self::MAP;
         }
 
-        if ($value === null || is_scalar($value)) {
+        // Objects left after normalization are claimed by a comparator.
+        if ($value === null || is_scalar($value) || is_object($value)) {
             return self::SCALAR;
         }
 
@@ -608,14 +686,6 @@ final class StructuredDiffer
             return false;
         }
 
-        if ($oldPath !== null) {
-            $this->kind($before, $oldPath);
-        }
-
-        if ($newPath !== null) {
-            $this->kind($after, $newPath);
-        }
-
         $this->changes[] = $this->change($type, $oldPath, $newPath, $before, $after);
 
         return true;
@@ -632,9 +702,9 @@ final class StructuredDiffer
             $oldPath === null ? null : Path::fromSegments($oldPath),
             $newPath === null ? null : Path::fromSegments($newPath),
             $oldPath !== null,
-            $before,
+            $oldPath === null ? null : $this->snapshot->take($before, $oldPath),
             $newPath !== null,
-            $after,
+            $newPath === null ? null : $this->snapshot->take($after, $newPath),
             $aggregate,
         );
     }
