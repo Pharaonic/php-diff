@@ -13,6 +13,8 @@ namespace Pharaonic\Diff;
 final class DiffLine
 {
     /**
+     * @param list<InlineSegment> $inlineSegments
+     *
      * @internal Lines are created by Diff::text().
      */
     public function __construct(
@@ -20,6 +22,7 @@ final class DiffLine
         private string $content,
         private ?int $oldLineNumber,
         private ?int $newLineNumber,
+        private array $inlineSegments = [],
     ) {
     }
 
@@ -53,7 +56,19 @@ final class DiffLine
     }
 
     /**
-     * @return array{type: string, content: string, old_line: int|null, new_line: int|null}
+     * The unchanged and changed pieces of a modified line, which join back into its content;
+     * empty when the whole line counts as changed: an unchanged or unpaired line, a line longer
+     * than TextDiffOptions::maxInlineLength(), or InlineMode::NONE
+     *
+     * @return list<InlineSegment>
+     */
+    public function inlineSegments(): array
+    {
+        return $this->inlineSegments;
+    }
+
+    /**
+     * @return array{type: string, content: string, old_line: int|null, new_line: int|null, inline: list<array{type: string, text: string}>}
      */
     public function toArray(): array
     {
@@ -62,6 +77,7 @@ final class DiffLine
             'content' => $this->content,
             'old_line' => $this->oldLineNumber,
             'new_line' => $this->newLineNumber,
+            'inline' => array_map(static fn (InlineSegment $segment): array => $segment->toArray(), $this->inlineSegments),
         ];
     }
 }

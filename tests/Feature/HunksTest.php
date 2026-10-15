@@ -53,7 +53,7 @@ it('keeps the lines of each hunk in order', function () {
 
     expect(array_map(fn ($line) => $line->content(), $hunk->lines()))->toBe(['7', '8', '9', '10', 'X', '11', '12', '13'])
         ->and($hunk->toArray())->toMatchArray(['old_start' => 7, 'old_length' => 7, 'new_start' => 7, 'new_length' => 7])
-        ->and($hunk->toArray()['lines'][3])->toBe(['type' => 'removed', 'content' => '10', 'old_line' => 10, 'new_line' => null]);
+        ->and($hunk->toArray()['lines'][3])->toBe(['type' => 'removed', 'content' => '10', 'old_line' => 10, 'new_line' => null, 'inline' => []]);
 });
 
 it('uses the configured context, as Git does', function () {

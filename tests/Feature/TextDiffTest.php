@@ -112,7 +112,7 @@ it('returns added and removed lines and stats', function () {
         ->and(array_map(fn (DiffLine $l) => $l->content(), $result->removedLines()))->toBe(['b'])
         ->and($result->stats())->toBe(['added' => 2, 'removed' => 1, 'modified' => 0, 'unchanged' => 2])
         ->and($result->hasChanges())->toBeTrue()
-        ->and($result->lines()[1]->toArray())->toBe(['type' => 'removed', 'content' => 'b', 'old_line' => 2, 'new_line' => null]);
+        ->and($result->lines()[1]->toArray())->toBe(['type' => 'removed', 'content' => 'b', 'old_line' => 2, 'new_line' => null, 'inline' => []]);
 });
 
 it('rejects texts above the limits on either side', function (string $old, string $new, string $message) {

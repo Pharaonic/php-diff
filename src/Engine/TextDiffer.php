@@ -8,7 +8,10 @@ use Pharaonic\Diff\Algorithm\Myers;
 use Pharaonic\Diff\ChangeType;
 use Pharaonic\Diff\DiffLine;
 use Pharaonic\Diff\Exceptions\InputLimitExceededException;
+use Pharaonic\Diff\InlineMode;
+use Pharaonic\Diff\ModifiedLinePair;
 use Pharaonic\Diff\Text\Hunks;
+use Pharaonic\Diff\Text\Inline;
 use Pharaonic\Diff\Text\LinePairs;
 use Pharaonic\Diff\Text\Lines;
 use Pharaonic\Diff\TextDiffOptions;
@@ -60,13 +63,51 @@ final class TextDiffer
             }
         }
 
+        $found = LinePairs::find($lines, $this->options);
+        $highlighted = [];
+
+        foreach ($found as [$removed, $added]) {
+            [$highlighted[$removed], $highlighted[$added]] = $this->highlight($lines[$removed], $lines[$added]);
+        }
+
+        $final = [];
+
+        foreach ($lines as $index => $line) {
+            $final[] = $highlighted[$index] ?? $line;
+        }
+
+        $lines = $final;
+        $pairs = array_map(static fn (array $pair): ModifiedLinePair => new ModifiedLinePair($lines[$pair[0]], $lines[$pair[1]]), $found);
+
         return new TextDiffResult(
             $lines,
             Hunks::build($lines, $this->options->contextLines()),
-            LinePairs::find($lines, $this->options),
+            $pairs,
             $old->endsWithNewline,
             $new->endsWithNewline,
         );
+    }
+
+    /**
+     * A paired removed and added line with their inline pieces, unchanged when highlighting is off
+     * or either line is longer than the inline limit
+     *
+     * @return array{DiffLine, DiffLine}
+     */
+    private function highlight(DiffLine $old, DiffLine $new): array
+    {
+        $limit = $this->options->inlineLengthLimit();
+
+        if ($this->options->inlineMode() === InlineMode::NONE || strlen($old->content()) > $limit || strlen($new->content()) > $limit) {
+            return [$old, $new];
+        }
+
+        [$oldSegments, $newSegments] = Inline::segments($old->content(), $new->content(), $this->options->inlineMode());
+
+        return [
+            new DiffLine($old->type(), $old->content(), $old->oldLineNumber(), null, $oldSegments),
+            new DiffLine($new->type(), $new->content(), null, $new->newLineNumber(), $newSegments),
+        ];
     }
 
     private function split(string $text, string $side): Lines

@@ -6,7 +6,6 @@ namespace Pharaonic\Diff\Text;
 
 use Pharaonic\Diff\ChangeType;
 use Pharaonic\Diff\DiffLine;
-use Pharaonic\Diff\ModifiedLinePair;
 use Pharaonic\Diff\TextDiffOptions;
 
 /**
@@ -24,9 +23,11 @@ final class LinePairs
     private const MAX_COMPARISONS = 10_000;
 
     /**
+     * The indexes in $lines of each removed line and its paired added line
+     *
      * @param list<DiffLine> $lines
      *
-     * @return list<ModifiedLinePair>
+     * @return list<array{int, int}>
      */
     public static function find(array $lines, TextDiffOptions $options): array
     {
@@ -38,11 +39,11 @@ final class LinePairs
         $removed = [];
         $added = [];
 
-        foreach ([...$lines, null] as $line) {
+        foreach ([...$lines, null] as $index => $line) {
             if ($line !== null && $line->type() === ChangeType::REMOVED) {
-                $removed[] = $line;
+                $removed[$index] = $line;
             } elseif ($line !== null && $line->type() === ChangeType::ADDED) {
-                $added[] = $line;
+                $added[$index] = $line;
             } else {
                 array_push($pairs, ...self::pairChange($removed, $added, $options));
                 $removed = $added = [];
@@ -53,16 +54,21 @@ final class LinePairs
     }
 
     /**
-     * @param list<DiffLine> $removed
-     * @param list<DiffLine> $added
+     * @param array<int, DiffLine> $removedLines By index in the whole diff
+     * @param array<int, DiffLine> $addedLines By index in the whole diff
      *
-     * @return list<ModifiedLinePair>
+     * @return list<array{int, int}>
      */
-    private static function pairChange(array $removed, array $added, TextDiffOptions $options): array
+    private static function pairChange(array $removedLines, array $addedLines, TextDiffOptions $options): array
     {
-        if ($removed === [] || $added === []) {
+        if ($removedLines === [] || $addedLines === []) {
             return [];
         }
+
+        $removedIndexes = array_keys($removedLines);
+        $addedIndexes = array_keys($addedLines);
+        $removed = array_values($removedLines);
+        $added = array_values($addedLines);
 
         $threshold = $options->threshold();
         $maxLength = $options->inlineLengthLimit();
@@ -72,7 +78,7 @@ final class LinePairs
 
             for ($i = 0, $count = min(count($removed), count($added)); $i < $count; $i++) {
                 if (Similarity::ratio($removed[$i]->content(), $added[$i]->content(), $maxLength) >= $threshold) {
-                    $pairs[] = new ModifiedLinePair($removed[$i], $added[$i]);
+                    $pairs[] = [$removedIndexes[$i], $addedIndexes[$i]];
                 }
             }
 
@@ -94,7 +100,7 @@ final class LinePairs
         $pairs = [];
 
         foreach ($matches as $i => $j) {
-            $pairs[] = new ModifiedLinePair($removed[$i], $added[$j]);
+            $pairs[] = [$removedIndexes[$i], $addedIndexes[$j]];
         }
 
         return $pairs;
