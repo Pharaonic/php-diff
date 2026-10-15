@@ -14,8 +14,8 @@ composer require pharaonic/php-diff
 use Pharaonic\Diff\Diff;
 
 $result = Diff::between(
-    ['user' => ['name' => 'Raji', 'age' => 32]],
-    ['user' => ['name' => 'Raji', 'age' => 33]],
+    ['user' => ['name' => 'Raggi', 'age' => 32]],
+    ['user' => ['name' => 'Raggi', 'age' => 33]],
 );
 
 $result->hasChanged('user');     // true
