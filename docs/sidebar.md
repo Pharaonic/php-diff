@@ -1,0 +1,22 @@
+- Getting Started
+  - [Overview](#overview)
+  - [Installation](#installation)
+  - [Quick Start](#quick-start)
+- Structured Diffs
+  - [How Values Are Compared](#structured-diffs)
+  - [Reading Results](#reading-results)
+  - [Paths & Wildcards](#paths)
+  - [Ignoring, Selecting & Redacting](#filtering)
+  - [Lists & Identity](#lists)
+  - [Objects](#objects)
+- Text Diffs
+  - [Text Diffs](#text-diffs)
+  - [Unified & HTML Output](#rendering)
+- Reference
+  - [Limits & Performance](#limits)
+  - [Exceptions](#exceptions)
+  - [Classes & Methods](#api-reference)
+  - [Examples](#examples)
+  - [Troubleshooting](#troubleshooting)
+- Community
+  - [Contributors](#contributors)
