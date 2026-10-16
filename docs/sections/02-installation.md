@@ -4,7 +4,7 @@ Install the package with Composer. There is nothing to register or configure.
 
 ### Requirements
 
-- PHP 8.3
+- PHP 8.4
 
 There are no runtime dependencies and no required PHP extensions.
 
