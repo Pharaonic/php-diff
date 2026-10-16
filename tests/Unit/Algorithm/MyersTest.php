@@ -31,7 +31,7 @@ function lcsLength(array $a, array $b): int
  * @param list<int|string> $a
  * @param list<int|string> $b
  */
-function checkedScript(array $a, array $b): string
+function checkedScript(array $a, array $b, bool $shortest = true): string
 {
     $edits = Myers::diff($a, $b);
     $rebuilt = [];
@@ -60,8 +60,11 @@ function checkedScript(array $a, array $b): string
     expect($x)->toBe(count($a))
         ->and($y)->toBe(count($b))
         ->and($rebuilt)->toBe($b)
-        ->and(substr_count($script, '='))->toBe(lcsLength($a, $b))
         ->and($script)->not->toMatch('/\+-/');
+
+    if ($shortest) {
+        expect(substr_count($script, '='))->toBe(lcsLength($a, $b));
+    }
 
     return $script;
 }
@@ -102,4 +105,24 @@ it('returns the same script for the same input', function () {
 
 it('compares tokens strictly', function () {
     expect(checkedScript([1], ['1']))->toBe('-+');
+});
+
+it('stays valid and fast on large, very different inputs', function (int $alphabet) {
+    mt_srand($alphabet);
+    $a = array_map(fn () => mt_rand(1, $alphabet), range(1, 3000));
+    $b = array_map(fn () => mt_rand(1, $alphabet), range(1, 3000));
+    $start = microtime(true);
+
+    checkedScript($a, $b, false);
+
+    expect(microtime(true) - $start)->toBeLessThan(10.0);
+})->with([4, 1000000]);
+
+it('still finds a script close to the shortest when the cost limit applies', function () {
+    mt_srand(99);
+    $a = array_map(fn () => mt_rand(1, 3), range(1, 1200));
+    $b = array_map(fn () => mt_rand(1, 3), range(1, 1200));
+    $equal = substr_count(checkedScript($a, $b, false), '=');
+
+    expect($equal / lcsLength($a, $b))->toBeGreaterThan(0.9);
 });

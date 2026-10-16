@@ -77,7 +77,7 @@ final class LinePairs
             $pairs = [];
 
             for ($i = 0, $count = min(count($removed), count($added)); $i < $count; $i++) {
-                if (Similarity::ratio($removed[$i]->content(), $added[$i]->content(), $maxLength) >= $threshold) {
+                if (Similarity::ratio($removed[$i]->content(), $added[$i]->content(), $maxLength, $threshold) >= $threshold) {
                     $pairs[] = [$removedIndexes[$i], $addedIndexes[$i]];
                 }
             }
@@ -89,7 +89,7 @@ final class LinePairs
 
         foreach ($removed as $i => $old) {
             foreach ($added as $j => $new) {
-                $scores[$i][$j] = Similarity::ratio($old->content(), $new->content(), $maxLength);
+                $scores[$i][$j] = Similarity::ratio($old->content(), $new->content(), $maxLength, $threshold);
             }
         }
 

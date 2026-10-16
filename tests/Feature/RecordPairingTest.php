@@ -37,3 +37,15 @@ it('pairs lists that share an item', function () {
     expect(summary(Diff::between([[1, 2]], [[1, 3]])))->toBe(['modified 0 [aggregate]', 'modified 0.1'])
         ->and(summary(Diff::between([[1, 2]], [[3, 4]])))->toBe(['removed 0', 'added 0']);
 });
+
+it('only pairs records at the same position in very large replaced runs', function () {
+    $before = array_map(fn (int $i) => ['n' => $i, 'v' => 'old'], range(1, 150));
+    $after = array_map(fn (int $i) => ['n' => $i, 'v' => 'new'], range(1, 150));
+    // Shift the new run by one unrelated record: positions no longer line up with their records.
+    $shifted = [['other' => true], ...$after];
+    $start = microtime(true);
+
+    expect(Diff::between($before, $after)->modified())->toHaveCount(300)
+        ->and(count(Diff::between($before, $shifted)->modified()))->toBeLessThan(10)
+        ->and(microtime(true) - $start)->toBeLessThan(10.0);
+});

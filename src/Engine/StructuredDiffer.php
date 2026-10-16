@@ -43,6 +43,11 @@ final class StructuredDiffer
     private const MIN_SHARED_KEYS = 0.5;
 
     /**
+     * A replaced run with more removed × added items than this only pairs items at the same position.
+     */
+    private const MAX_PAIRING_COMPARISONS = 10_000;
+
+    /**
      * @var list<Change>
      */
     private array $changes = [];
@@ -434,7 +439,8 @@ final class StructuredDiffer
     /**
      * Pair removed and added items in order, never crossing an earlier pair. Scalars pair only in
      * a sequence run where as many items were removed as added; records pair only when they
-     * share most of their keys and at least one value.
+     * share most of their keys and at least one value. Very large runs only pair items at the
+     * same position in the run.
      *
      * @param list<mixed> $before
      * @param list<mixed> $after
@@ -449,6 +455,17 @@ final class StructuredDiffer
     {
         $scalars = $positional && count($removed) === count($added);
         $pairs = [];
+
+        if (count($removed) * count($added) > self::MAX_PAIRING_COMPARISONS) {
+            foreach ($added as $offset => $newIndex) {
+                if (isset($removed[$offset]) && $this->pairable($before[$removed[$offset]], $after[$newIndex], [...$old, $removed[$offset]], [...$new, $newIndex], $scalars)) {
+                    $pairs[$newIndex] = $removed[$offset];
+                }
+            }
+
+            return $pairs;
+        }
+
         $next = 0;
 
         foreach ($added as $newIndex) {

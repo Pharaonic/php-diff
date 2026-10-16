@@ -102,3 +102,11 @@ it('stays fast and deterministic on large changes', function () {
         ->and(pairs($old, $new))->toBe($result)
         ->and(microtime(true) - $start)->toBeLessThan(10.0);
 });
+
+it('returns an upper bound below the floor without aligning words', function () {
+    // Same words in a different order: they can share at most all four, so the bound is 1.0 and
+    // the exact ratio is computed; with no shared words the bound 0.0 comes back at once.
+    expect(Similarity::ratio('a b c d', 'd c b a', 1000, 0.9))->toBe(0.25)
+        ->and(Similarity::ratio('a b', 'c d', 1000, 0.5))->toBe(0.0)
+        ->and(Similarity::ratio('a b x', 'a c y', 1000, 0.9))->toBe(2 / 6);
+});

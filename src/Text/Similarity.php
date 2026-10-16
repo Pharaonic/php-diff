@@ -13,11 +13,14 @@ use Pharaonic\Diff\Algorithm\Myers;
  * Lines longer than the inline limit are scored by their common prefix and suffix instead, which
  * stays fast on huge lines. Lines without any words are compared character by character.
  *
+ * When the words two lines share regardless of order already score below $floor, that upper
+ * bound is returned without aligning the words, since only scores at or above it matter.
+ *
  * @internal
  */
 final class Similarity
 {
-    public static function ratio(string $a, string $b, int $maxLength): float
+    public static function ratio(string $a, string $b, int $maxLength, float $floor = 0.0): float
     {
         if ($a === $b) {
             return 1.0;
@@ -39,13 +42,38 @@ final class Similarity
             $bTokens = str_split($b);
         }
 
+        $total = count($aTokens) + count($bTokens);
+        $bound = 2 * self::shared($aTokens, $bTokens) / $total;
+
+        if ($bound < $floor) {
+            return $bound;
+        }
+
         $common = 0;
 
         foreach (Myers::diff($aTokens, $bTokens) as [$operation]) {
             $common += $operation === Myers::EQUAL ? 1 : 0;
         }
 
-        return 2 * $common / (count($aTokens) + count($bTokens));
+        return 2 * $common / $total;
+    }
+
+    /**
+     * How many tokens both lists contain, counting repeats, regardless of order
+     *
+     * @param list<string> $a
+     * @param list<string> $b
+     */
+    private static function shared(array $a, array $b): int
+    {
+        $counts = array_count_values($b);
+        $shared = 0;
+
+        foreach (array_count_values($a) as $token => $count) {
+            $shared += min($count, $counts[$token] ?? 0);
+        }
+
+        return $shared;
     }
 
     private static function edges(string $a, string $b): float

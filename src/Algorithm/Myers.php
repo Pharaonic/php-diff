@@ -10,10 +10,16 @@ namespace Pharaonic\Diff\Algorithm;
  * Tokens are compared with ===. Common prefixes and suffixes are stripped first, and inside
  * every run of edits the deletions come before the insertions, as in Git.
  *
+ * Like Git, a search that needs more than max(MIN_COST, √(N + M)) edits to find its middle snake
+ * stops there and splits at the furthest point it reached, so very different inputs stay fast;
+ * the script is then still valid but may not be the shortest.
+ *
  * @internal
  */
 final class Myers
 {
+    private const MIN_COST = 256;
+
     public const EQUAL = 0;
 
     public const DELETE = 1;
@@ -181,6 +187,7 @@ final class Myers
 
         $delta = $width - $height;
         $max = intdiv($size + 1, 2);
+        $maxCost = max(self::MIN_COST, (int) sqrt($size));
         $forward = [1 => $left];
         $backward = [1 => $bottom];
 
@@ -234,9 +241,38 @@ final class Myers
                     return [[$x, $y], [$px, $py]];
                 }
             }
+
+            if ($d >= $maxCost) {
+                $point = self::furthest($forward, $d, $left, $top, $right, $bottom);
+
+                return [$point, $point];
+            }
         }
 
         return null;
+    }
+
+    /**
+     * The point inside the box that the forward search reached furthest after $d edits
+     *
+     * @param array<int, int> $forward
+     *
+     * @return array{int, int}
+     */
+    private static function furthest(array $forward, int $d, int $left, int $top, int $right, int $bottom): array
+    {
+        $best = [$left, $top];
+
+        for ($k = -$d; $k <= $d; $k += 2) {
+            $x = $forward[$k];
+            $y = $top + ($x - $left) - $k;
+
+            if ($x <= $right && $y >= $top && $y <= $bottom && $x + $y > $best[0] + $best[1]) {
+                $best = [$x, $y];
+            }
+        }
+
+        return $best;
     }
 
     /**
