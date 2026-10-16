@@ -55,7 +55,7 @@ final class Hunk
     }
 
     /**
-     * @return array{old_start: int, old_length: int, new_start: int, new_length: int, lines: list<array{type: string, content: string, old_line: int|null, new_line: int|null}>}
+     * @return array{old_start: int, old_length: int, new_start: int, new_length: int, lines: list<array{type: string, content: string, old_line: int|null, new_line: int|null, inline: list<array{type: string, text: string}>}>}
      */
     public function toArray(): array
     {

@@ -123,7 +123,7 @@ final class TextDiffResult implements JsonSerializable
     }
 
     /**
-     * @return array{stats: array{added: int, removed: int, modified: int, unchanged: int}, old_ends_with_newline: bool, new_ends_with_newline: bool, hunks: list<array{old_start: int, old_length: int, new_start: int, new_length: int, lines: list<array{type: string, content: string, old_line: int|null, new_line: int|null}>}>, modified: list<array{old_line: int|null, new_line: int|null}>}
+     * @return array{stats: array{added: int, removed: int, modified: int, unchanged: int}, old_ends_with_newline: bool, new_ends_with_newline: bool, hunks: list<array{old_start: int, old_length: int, new_start: int, new_length: int, lines: list<array{type: string, content: string, old_line: int|null, new_line: int|null, inline: list<array{type: string, text: string}>}>}>, modified: list<array{old_line: int|null, new_line: int|null}>}
      */
     public function toArray(): array
     {
@@ -137,7 +137,7 @@ final class TextDiffResult implements JsonSerializable
     }
 
     /**
-     * @return array{stats: array{added: int, removed: int, modified: int, unchanged: int}, old_ends_with_newline: bool, new_ends_with_newline: bool, hunks: list<array{old_start: int, old_length: int, new_start: int, new_length: int, lines: list<array{type: string, content: string, old_line: int|null, new_line: int|null}>}>, modified: list<array{old_line: int|null, new_line: int|null}>}
+     * @return array{stats: array{added: int, removed: int, modified: int, unchanged: int}, old_ends_with_newline: bool, new_ends_with_newline: bool, hunks: list<array{old_start: int, old_length: int, new_start: int, new_length: int, lines: list<array{type: string, content: string, old_line: int|null, new_line: int|null, inline: list<array{type: string, text: string}>}>}>, modified: list<array{old_line: int|null, new_line: int|null}>}
      */
     public function jsonSerialize(): array
     {
