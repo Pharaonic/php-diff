@@ -50,17 +50,17 @@ it('checks change types at exact paths', function () {
 it('returns changes by type', function () {
     $result = sampleResult();
 
-    expect(array_map(fn (Change $c) => $c->path()->toDot(), $result->added()))->toBe(['user.age'])
-        ->and(array_map(fn (Change $c) => $c->path()->toDot(), $result->removed()))->toBe(['user.nickname'])
-        ->and(array_map(fn (Change $c) => $c->path()->toDot(), $result->modified()))->toBe(['user', 'user.email', 'tags', 'tags.a\.b'])
+    expect(array_map(fn(Change $c) => $c->path()->toDot(), $result->added()))->toBe(['user.age'])
+        ->and(array_map(fn(Change $c) => $c->path()->toDot(), $result->removed()))->toBe(['user.nickname'])
+        ->and(array_map(fn(Change $c) => $c->path()->toDot(), $result->modified()))->toBe(['user', 'user.email', 'tags', 'tags.a\.b'])
         ->and($result->moved())->toBe([]);
 });
 
 it('returns changes at a path or under it', function () {
     $result = sampleResult();
 
-    expect(array_map(fn (Change $c) => $c->path()->toDot(), $result->at('user')))->toBe(['user'])
-        ->and(array_map(fn (Change $c) => $c->path()->toDot(), $result->under('user')))->toBe(['user', 'user.email', 'user.age', 'user.nickname'])
+    expect(array_map(fn(Change $c) => $c->path()->toDot(), $result->at('user')))->toBe(['user'])
+        ->and(array_map(fn(Change $c) => $c->path()->toDot(), $result->under('user')))->toBe(['user', 'user.email', 'user.age', 'user.nickname'])
         ->and($result->at('missing'))->toBe([])
         ->and($result->under(''))->toBe($result->changes());
 });
@@ -99,9 +99,9 @@ it('serializes to arrays and JSON', function () {
 it('throws on values JSON cannot encode unless the flags allow them', function () {
     $result = Diff::between(['a' => 1], ['a' => "\xB1"]);
 
-    expect(fn () => $result->toJson())->toThrow(JsonException::class)
+    expect(fn() => $result->toJson())->toThrow(JsonException::class)
         ->and(json_decode($result->toJson(JSON_INVALID_UTF8_SUBSTITUTE), true)[0]['new'])->toBe("\u{FFFD}")
-        ->and(fn () => Diff::between(1.0, NAN)->toJson())->toThrow(JsonException::class);
+        ->and(fn() => Diff::between(1.0, NAN)->toJson())->toThrow(JsonException::class);
 });
 
 function listResult(): DiffResult
@@ -139,9 +139,9 @@ it('returns every change at a path, including a move and a modification', functi
         Pharaonic\Diff\DiffOptions::create()->identify('', 'id')->detectMoves(),
     );
 
-    expect(array_map(fn (Change $c) => $c->type(), $result->at('0')))->toBe(['modified'])
-        ->and(array_map(fn (Change $c) => $c->type(), $result->at('1')))->toBe(['moved'])
-        ->and(array_map(fn (Change $c) => $c->type(), $result->under('1')))->toBe(['modified', 'modified', 'moved']);
+    expect(array_map(fn(Change $c) => $c->type(), $result->at('0')))->toBe(['modified'])
+        ->and(array_map(fn(Change $c) => $c->type(), $result->at('1')))->toBe(['moved'])
+        ->and(array_map(fn(Change $c) => $c->type(), $result->under('1')))->toBe(['modified', 'modified', 'moved']);
 });
 
 it('finds changes under a path through their old or new path', function () {

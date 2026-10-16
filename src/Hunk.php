@@ -23,8 +23,7 @@ final class Hunk
         private int $newStart,
         private int $newLength,
         private array $lines,
-    ) {
-    }
+    ) {}
 
     public function oldStart(): int
     {
@@ -64,7 +63,7 @@ final class Hunk
             'old_length' => $this->oldLength,
             'new_start' => $this->newStart,
             'new_length' => $this->newLength,
-            'lines' => array_map(static fn (DiffLine $line): array => $line->toArray(), $this->lines),
+            'lines' => array_map(static fn(DiffLine $line): array => $line->toArray(), $this->lines),
         ];
     }
 }

@@ -14,9 +14,7 @@ final class Lines
     /**
      * @param list<string> $lines
      */
-    private function __construct(public array $lines, public bool $endsWithNewline)
-    {
-    }
+    private function __construct(public array $lines, public bool $endsWithNewline) {}
 
     public static function split(string $text): self
     {

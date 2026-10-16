@@ -21,8 +21,8 @@ it('returns new options from every method and leaves the original unchanged', fu
     'listStrategy' => ['listStrategy', ['tags', ListStrategy::UNORDERED]],
     'identify' => ['identify', ['users', 'id']],
     'detectMoves' => ['detectMoves', []],
-    'normalize' => ['normalize', [DateTimeInterface::class, fn () => 1]],
-    'compare' => ['compare', [stdClass::class, fn () => true]],
+    'normalize' => ['normalize', [DateTimeInterface::class, fn() => 1]],
+    'compare' => ['compare', [stdClass::class, fn() => true]],
 ]);
 
 it('has documented defaults', function () {
@@ -63,7 +63,7 @@ it('keeps list rules in the order they were added', function () {
 it('keeps normalizers and comparators as closures', function () {
     $options = DiffOptions::create()
         ->normalize(DateTimeInterface::class, 'get_object_vars')
-        ->compare(stdClass::class, fn (object $a, object $b): bool => true);
+        ->compare(stdClass::class, fn(object $a, object $b): bool => true);
 
     expect($options->normalizers()[0][0])->toBe(DateTimeInterface::class)
         ->and($options->normalizers()[0][1])->toBeInstanceOf(Closure::class)
@@ -71,7 +71,7 @@ it('keeps normalizers and comparators as closures', function () {
 });
 
 it('rejects invalid configuration', function (string $method, array $arguments, string $message) {
-    expect(fn () => DiffOptions::create()->{$method}(...$arguments))->toThrow(InvalidArgumentException::class, $message);
+    expect(fn() => DiffOptions::create()->{$method}(...$arguments))->toThrow(InvalidArgumentException::class, $message);
 })->with([
     'empty segment' => ['ignore', ['a..b'], 'The path "a..b" has an empty segment.'],
     'non-string path' => ['only', [[1]], 'A path must be a string, int given.'],
@@ -83,6 +83,6 @@ it('rejects invalid configuration', function (string $method, array $arguments, 
     'no identity keys' => ['identify', ['users', []], 'Identity keys must be a key or a non-empty list of keys.'],
     'keyed identity keys' => ['identify', ['users', ['a' => 'id']], 'Identity keys must be a key or a non-empty list of keys.'],
     'invalid identity key' => ['identify', ['users', [1.5]], 'An identity key must be an int or a string, float given.'],
-    'unknown normalizer class' => ['normalize', ['NoSuchClass', fn () => 1], 'The class or interface "NoSuchClass" does not exist.'],
-    'unknown comparator class' => ['compare', ['NoSuchClass', fn () => true], 'The class or interface "NoSuchClass" does not exist.'],
+    'unknown normalizer class' => ['normalize', ['NoSuchClass', fn() => 1], 'The class or interface "NoSuchClass" does not exist.'],
+    'unknown comparator class' => ['compare', ['NoSuchClass', fn() => true], 'The class or interface "NoSuchClass" does not exist.'],
 ]);

@@ -12,9 +12,7 @@ use Pharaonic\Diff\Engine\TextDiffer;
  */
 final class Diff
 {
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     /**
      * Compare two structured values: scalars, null, arrays and objects

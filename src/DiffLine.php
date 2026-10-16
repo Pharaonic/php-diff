@@ -23,8 +23,7 @@ final class DiffLine
         private ?int $oldLineNumber,
         private ?int $newLineNumber,
         private array $inlineSegments = [],
-    ) {
-    }
+    ) {}
 
     /**
      * ChangeType::ADDED, ChangeType::REMOVED or ChangeType::UNCHANGED
@@ -77,7 +76,7 @@ final class DiffLine
             'content' => $this->content,
             'old_line' => $this->oldLineNumber,
             'new_line' => $this->newLineNumber,
-            'inline' => array_map(static fn (InlineSegment $segment): array => $segment->toArray(), $this->inlineSegments),
+            'inline' => array_map(static fn(InlineSegment $segment): array => $segment->toArray(), $this->inlineSegments),
         ];
     }
 }

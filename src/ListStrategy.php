@@ -26,7 +26,5 @@ final class ListStrategy
      */
     public const UNORDERED = 'unordered';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 }

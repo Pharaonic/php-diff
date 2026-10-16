@@ -98,5 +98,5 @@ it('does not count pruned branches toward the maximum depth', function () {
 
     expect(summary(Diff::between($before, $after, $options->ignore('deep'))))->toBe(['modified ok'])
         ->and(summary(Diff::between($before, $after, $options->only('ok'))))->toBe(['modified ok'])
-        ->and(fn () => Diff::between($before, $after, $options))->toThrow(MaximumDepthExceededException::class);
+        ->and(fn() => Diff::between($before, $after, $options))->toThrow(MaximumDepthExceededException::class);
 });

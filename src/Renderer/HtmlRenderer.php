@@ -70,7 +70,7 @@ final class HtmlRenderer
 
     private static function header(Hunk $hunk): string
     {
-        $range = static fn (int $start, int $length): string => $length === 1 ? (string) $start : "{$start},{$length}";
+        $range = static fn(int $start, int $length): string => $length === 1 ? (string) $start : "{$start},{$length}";
 
         return '<tr class="ph-diff-hunk-header"><td class="ph-diff-hunk-header-text" colspan="3">'
             . sprintf('@@ -%s +%s @@', $range($hunk->oldStart(), $hunk->oldLength()), $range($hunk->newStart(), $hunk->newLength()))

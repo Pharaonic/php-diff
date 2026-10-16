@@ -18,9 +18,7 @@ final class Path
     /**
      * @param list<int|string> $segments
      */
-    private function __construct(private array $segments)
-    {
-    }
+    private function __construct(private array $segments) {}
 
     /**
      * @param array<int|string> $segments
@@ -37,7 +35,7 @@ final class Path
     public static function fromDot(string $path): self
     {
         return self::fromSegments(array_map(
-            static fn (?string $segment): string => $segment ?? '*',
+            static fn(?string $segment): string => $segment ?? '*',
             DotNotation::parse($path),
         ));
     }

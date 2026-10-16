@@ -46,7 +46,7 @@ it('returns new options and leaves the original unchanged', function () {
 });
 
 it('rejects invalid configuration', function (string $method, array $arguments, string $message) {
-    expect(fn () => TextDiffOptions::create()->{$method}(...$arguments))->toThrow(InvalidArgumentException::class, $message);
+    expect(fn() => TextDiffOptions::create()->{$method}(...$arguments))->toThrow(InvalidArgumentException::class, $message);
 })->with([
     'context' => ['context', [-1], 'The context must be at least 0, -1 given.'],
     'threshold above 1' => ['similarityThreshold', [1.1], 'The similarity threshold must be between 0 and 1.'],

@@ -8,9 +8,7 @@ use JsonSerializable;
 
 final class Payload implements JsonSerializable
 {
-    public function __construct(public mixed $data)
-    {
-    }
+    public function __construct(public mixed $data) {}
 
     public function jsonSerialize(): mixed
     {

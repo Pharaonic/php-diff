@@ -14,9 +14,7 @@ final class ModifiedLinePair
     /**
      * @internal Pairs are created by Diff::text().
      */
-    public function __construct(private DiffLine $removed, private DiffLine $added)
-    {
-    }
+    public function __construct(private DiffLine $removed, private DiffLine $added) {}
 
     public function removed(): DiffLine
     {

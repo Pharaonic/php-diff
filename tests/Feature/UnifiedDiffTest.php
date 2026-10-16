@@ -70,6 +70,6 @@ it('serializes hunks to arrays and JSON', function () {
 it('throws on text JSON cannot encode unless the flags allow it', function () {
     $result = Diff::text("a\n", "\xB1\n");
 
-    expect(fn () => $result->toJson())->toThrow(JsonException::class)
+    expect(fn() => $result->toJson())->toThrow(JsonException::class)
         ->and($result->toJson(JSON_INVALID_UTF8_SUBSTITUTE))->toBeString();
 });

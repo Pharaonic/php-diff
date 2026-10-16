@@ -29,7 +29,7 @@ it('renders a GitHub-style table', function () {
     expect($xpath->query('/table[@class="ph-diff"]/tbody[@class="ph-diff-hunk"]')->length)->toBe(1)
         ->and($xpath->evaluate('string(//td[@class="ph-diff-hunk-header-text"])'))->toBe('@@ -1,3 +1,4 @@')
         ->and($rows->length)->toBe(5)
-        ->and(array_map(fn (DOMElement $row) => $row->getAttribute('class'), iterator_to_array($rows)))->toBe([
+        ->and(array_map(fn(DOMElement $row) => $row->getAttribute('class'), iterator_to_array($rows)))->toBe([
             'ph-diff-line ph-diff-line--context',
             'ph-diff-line ph-diff-line--removed',
             'ph-diff-line ph-diff-line--added',

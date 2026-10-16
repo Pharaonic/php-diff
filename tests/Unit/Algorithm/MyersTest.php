@@ -89,8 +89,8 @@ it('keeps the invariants on generated sequences', function (int $seed) {
 
     for ($round = 0; $round < 40; $round++) {
         $alphabet = mt_rand(1, 6);
-        $a = array_map(fn () => mt_rand(1, $alphabet), range(1, mt_rand(1, 30)));
-        $b = array_map(fn () => mt_rand(1, $alphabet), range(1, mt_rand(1, 30)));
+        $a = array_map(fn() => mt_rand(1, $alphabet), range(1, mt_rand(1, 30)));
+        $b = array_map(fn() => mt_rand(1, $alphabet), range(1, mt_rand(1, 30)));
 
         checkedScript(mt_rand(0, 9) === 0 ? [] : $a, $b);
     }
@@ -109,8 +109,8 @@ it('compares tokens strictly', function () {
 
 it('stays valid and fast on large, very different inputs', function (int $alphabet) {
     mt_srand($alphabet);
-    $a = array_map(fn () => mt_rand(1, $alphabet), range(1, 3000));
-    $b = array_map(fn () => mt_rand(1, $alphabet), range(1, 3000));
+    $a = array_map(fn() => mt_rand(1, $alphabet), range(1, 3000));
+    $b = array_map(fn() => mt_rand(1, $alphabet), range(1, 3000));
     $start = microtime(true);
 
     checkedScript($a, $b, false);
@@ -120,8 +120,8 @@ it('stays valid and fast on large, very different inputs', function (int $alphab
 
 it('still finds a script close to the shortest when the cost limit applies', function () {
     mt_srand(99);
-    $a = array_map(fn () => mt_rand(1, 3), range(1, 1200));
-    $b = array_map(fn () => mt_rand(1, 3), range(1, 1200));
+    $a = array_map(fn() => mt_rand(1, 3), range(1, 1200));
+    $b = array_map(fn() => mt_rand(1, 3), range(1, 1200));
     $equal = substr_count(checkedScript($a, $b, false), '=');
 
     expect($equal / lcsLength($a, $b))->toBeGreaterThan(0.9);

@@ -24,7 +24,7 @@ it('aligns lines', function (string $old, string $new, array $expected) {
 it('numbers lines from 1 on each side', function () {
     $lines = Diff::text("alpha\nbeta\ngamma\n", "alpha\nbeta changed\ngamma\ndelta\n")->lines();
 
-    expect(array_map(fn (DiffLine $l) => [$l->type(), $l->content(), $l->oldLineNumber(), $l->newLineNumber()], $lines))->toBe([
+    expect(array_map(fn(DiffLine $l) => [$l->type(), $l->content(), $l->oldLineNumber(), $l->newLineNumber()], $lines))->toBe([
         ['unchanged', 'alpha', 1, 1],
         ['removed', 'beta', 2, null],
         ['added', 'beta changed', null, 2],
@@ -108,15 +108,15 @@ it('keeps the old content of lines that only differ in ignored whitespace', func
 it('returns added and removed lines and stats', function () {
     $result = Diff::text("a\nb\nc\n", "a\nB\nc\nd\n");
 
-    expect(array_map(fn (DiffLine $l) => $l->content(), $result->addedLines()))->toBe(['B', 'd'])
-        ->and(array_map(fn (DiffLine $l) => $l->content(), $result->removedLines()))->toBe(['b'])
+    expect(array_map(fn(DiffLine $l) => $l->content(), $result->addedLines()))->toBe(['B', 'd'])
+        ->and(array_map(fn(DiffLine $l) => $l->content(), $result->removedLines()))->toBe(['b'])
         ->and($result->stats())->toBe(['added' => 2, 'removed' => 1, 'modified' => 0, 'unchanged' => 2])
         ->and($result->hasChanges())->toBeTrue()
         ->and($result->lines()[1]->toArray())->toBe(['type' => 'removed', 'content' => 'b', 'old_line' => 2, 'new_line' => null, 'inline' => []]);
 });
 
 it('rejects texts above the limits on either side', function (string $old, string $new, string $message) {
-    expect(fn () => Diff::text($old, $new, TextDiffOptions::create()->maxLines(2)->maxInputBytes(10)))
+    expect(fn() => Diff::text($old, $new, TextDiffOptions::create()->maxLines(2)->maxInputBytes(10)))
         ->toThrow(InputLimitExceededException::class, $message);
 })->with([
     'old lines' => ["a\nb\nc", 'a', 'The old text has 3 lines, more than the maximum of 2.'],
@@ -130,7 +130,7 @@ it('accepts texts exactly at the limits', function () {
 });
 
 it('produces the same lines for the same input', function () {
-    $old = implode("\n", array_map(fn ($i) => "line {$i}", range(1, 300)));
+    $old = implode("\n", array_map(fn($i) => "line {$i}", range(1, 300)));
     $new = str_replace(['line 5', 'line 77'], ['line five', 'gone'], $old);
 
     expect(textLines(Diff::text($old, $new)))->toBe(textLines(Diff::text($old, $new)));

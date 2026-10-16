@@ -9,6 +9,4 @@ use Throwable;
 /**
  * Implemented by every exception this package throws, so callers can catch them all at once.
  */
-interface DiffException extends Throwable
-{
-}
+interface DiffException extends Throwable {}

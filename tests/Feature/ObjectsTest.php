@@ -24,7 +24,7 @@ it('compares stdClass objects as maps', function () {
 });
 
 it('normalizes objects with a registered normalizer', function () {
-    $options = DiffOptions::create()->normalize(Money::class, fn (Money $m) => ['cents' => $m->cents, 'currency' => $m->currency]);
+    $options = DiffOptions::create()->normalize(Money::class, fn(Money $m) => ['cents' => $m->cents, 'currency' => $m->currency]);
 
     expect(summary(Diff::between(['price' => new Money(100, 'EGP')], ['price' => new Money(150, 'EGP')], $options)))
         ->toBe(['modified price [aggregate]', 'modified price.cents']);
@@ -32,14 +32,14 @@ it('normalizes objects with a registered normalizer', function () {
 
 it('uses the last normalizer registered for a matching class', function () {
     $options = DiffOptions::create()
-        ->normalize(Money::class, fn (Money $m) => $m->cents)
-        ->normalize(Money::class, fn (Money $m) => $m->currency);
+        ->normalize(Money::class, fn(Money $m) => $m->cents)
+        ->normalize(Money::class, fn(Money $m) => $m->currency);
 
     expect(Diff::between(new Money(1, 'EGP'), new Money(2, 'EGP'), $options)->hasChanges())->toBeFalse();
 });
 
 it('prefers a registered normalizer over jsonSerialize()', function () {
-    $options = DiffOptions::create()->normalize(Payload::class, fn () => 'same');
+    $options = DiffOptions::create()->normalize(Payload::class, fn() => 'same');
 
     expect(Diff::between(new Payload(1), new Payload(2), $options)->hasChanges())->toBeFalse();
 });
@@ -49,10 +49,10 @@ it('normalizes again when a normalizer returns another object', function () {
 });
 
 it('compares traversables only through an explicit normalizer', function () {
-    $options = DiffOptions::create()->normalize(Traversable::class, fn (Traversable $t) => iterator_to_array($t));
+    $options = DiffOptions::create()->normalize(Traversable::class, fn(Traversable $t) => iterator_to_array($t));
 
     expect(summary(Diff::between(new ArrayIterator([1, 2]), new ArrayIterator([1, 3]), $options)))->toBe(['modified 1'])
-        ->and(fn () => Diff::between(new ArrayIterator([1]), new ArrayIterator([1])))
+        ->and(fn() => Diff::between(new ArrayIterator([1]), new ArrayIterator([1])))
         ->toThrow(UnsupportedValueException::class, 'An object of class ArrayIterator cannot be compared without a normalizer at the root.');
 });
 
@@ -61,7 +61,7 @@ it('rejects generators', function () {
         yield 1;
     })();
 
-    expect(fn () => Diff::between(['g' => $generator], ['g' => $generator]))
+    expect(fn() => Diff::between(['g' => $generator], ['g' => $generator]))
         ->toThrow(UnsupportedValueException::class, 'A generator cannot be compared at path "g".');
 });
 
@@ -83,7 +83,7 @@ it('stops at an object that contains itself', function () {
 })->throws(UnsupportedValueException::class, 'The stdClass object contains itself at path "self".');
 
 it('stops at a normalizer that returns its own object', function () {
-    $options = DiffOptions::create()->normalize(Money::class, fn (Money $m) => $m);
+    $options = DiffOptions::create()->normalize(Money::class, fn(Money $m) => $m);
 
     Diff::between(new Money(1, 'EGP'), new Money(2, 'EGP'), $options);
 })->throws(UnsupportedValueException::class, 'The Pharaonic\Diff\Tests\Fixtures\Money object contains itself at the root.');
@@ -134,30 +134,30 @@ it('aligns lists of dates by instant', function () {
 });
 
 it('lets a comparator decide alone, without traversing', function () {
-    $options = DiffOptions::create()->compare(Money::class, fn (Money $a, Money $b): bool => $a->currency === $b->currency);
+    $options = DiffOptions::create()->compare(Money::class, fn(Money $a, Money $b): bool => $a->currency === $b->currency);
 
     expect(Diff::between(['p' => new Money(1, 'EGP')], ['p' => new Money(2, 'EGP')], $options)->hasChanges())->toBeFalse()
         ->and(summary(Diff::between(['p' => new Money(1, 'EGP')], ['p' => new Money(1, 'USD')], $options)))->toBe(['modified p']);
 });
 
 it('applies a comparator only when both values are instances of its class', function () {
-    $options = DiffOptions::create()->compare(Money::class, fn () => true);
+    $options = DiffOptions::create()->compare(Money::class, fn() => true);
 
     expect(summary(Diff::between(['p' => new Money(1, 'EGP')], ['p' => 1], $options)))->toBe(['modified p']);
 });
 
 it('lets a comparator override the built-in date comparison', function () {
-    $options = DiffOptions::create()->compare(DateTimeInterface::class, fn (DateTimeInterface $a, DateTimeInterface $b): bool => $a->format('Y-m-d') === $b->format('Y-m-d'));
+    $options = DiffOptions::create()->compare(DateTimeInterface::class, fn(DateTimeInterface $a, DateTimeInterface $b): bool => $a->format('Y-m-d') === $b->format('Y-m-d'));
 
     expect(Diff::between(new DateTimeImmutable('2026-10-15 01:00'), new DateTimeImmutable('2026-10-15 23:00'), $options)->hasChanges())->toBeFalse();
 });
 
 it('treats only a comparator that returns true as equal', function () {
-    expect(Diff::between(new Money(1, 'EGP'), new Money(1, 'EGP'), DiffOptions::create()->compare(Money::class, fn () => 1))->hasChanges())->toBeTrue();
+    expect(Diff::between(new Money(1, 'EGP'), new Money(1, 'EGP'), DiffOptions::create()->compare(Money::class, fn() => 1))->hasChanges())->toBeTrue();
 });
 
 it('uses the last comparator registered for a matching class', function () {
-    $options = DiffOptions::create()->compare(Money::class, fn () => false)->compare(Money::class, fn () => true);
+    $options = DiffOptions::create()->compare(Money::class, fn() => false)->compare(Money::class, fn() => true);
 
     expect(Diff::between(new Money(1, 'EGP'), new Money(2, 'EGP'), $options)->hasChanges())->toBeFalse();
 });
@@ -170,7 +170,7 @@ it('matches identities inside normalized records', function () {
 });
 
 it('aligns lists of objects a comparator finds equal', function () {
-    $options = DiffOptions::create()->compare(Money::class, fn (Money $a, Money $b) => $a->cents === $b->cents);
+    $options = DiffOptions::create()->compare(Money::class, fn(Money $a, Money $b) => $a->cents === $b->cents);
 
     $result = Diff::between(
         ['prices' => [new Money(100, 'EGP'), new Money(200, 'EGP')]],
@@ -183,7 +183,7 @@ it('aligns lists of objects a comparator finds equal', function () {
 
 it('matches objects a comparator finds equal in unordered lists', function () {
     $options = DiffOptions::create()
-        ->compare(Money::class, fn (Money $a, Money $b) => $a->cents === $b->cents)
+        ->compare(Money::class, fn(Money $a, Money $b) => $a->cents === $b->cents)
         ->listStrategy('prices', ListStrategy::UNORDERED);
 
     $result = Diff::between(
@@ -197,7 +197,7 @@ it('matches objects a comparator finds equal in unordered lists', function () {
 
 it('matches identities that a comparator finds equal', function () {
     $options = DiffOptions::create()
-        ->compare(Money::class, fn (Money $a, Money $b) => $a->cents === $b->cents)
+        ->compare(Money::class, fn(Money $a, Money $b) => $a->cents === $b->cents)
         ->identify('rows', 'price');
 
     $result = Diff::between(
@@ -211,7 +211,7 @@ it('matches identities that a comparator finds equal', function () {
 
 it('applies a date comparator when aligning lists', function () {
     $options = DiffOptions::create()
-        ->compare(DateTimeInterface::class, fn (DateTimeInterface $a, DateTimeInterface $b) => $a->format('Y-m-d') === $b->format('Y-m-d'))
+        ->compare(DateTimeInterface::class, fn(DateTimeInterface $a, DateTimeInterface $b) => $a->format('Y-m-d') === $b->format('Y-m-d'))
         ->listStrategy('days', ListStrategy::UNORDERED);
 
     $result = Diff::between(
@@ -224,7 +224,7 @@ it('applies a date comparator when aligning lists', function () {
 });
 
 it('lets a normalizer override the built-in date comparison', function () {
-    $options = DiffOptions::create()->normalize(DateTimeInterface::class, fn (DateTimeInterface $date) => $date->format('Y-m-d'));
+    $options = DiffOptions::create()->normalize(DateTimeInterface::class, fn(DateTimeInterface $date) => $date->format('Y-m-d'));
 
     $result = Diff::between(['at' => new DateTime('2026-01-01 10:00')], ['at' => new DateTime('2026-01-02 11:00')], $options);
 

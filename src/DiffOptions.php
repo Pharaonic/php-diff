@@ -56,9 +56,7 @@ final class DiffOptions
      */
     private array $comparators = [];
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function create(): self
     {
