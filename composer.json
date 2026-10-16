@@ -29,11 +29,11 @@
     "security": "https://github.com/Pharaonic/php-diff/security/policy"
   },
   "require": {
-    "php": ">=8.2 <8.3"
+    "php": ">=8.3 <8.4"
   },
   "require-dev": {
     "laravel/pint": "^1.20",
-    "pestphp/pest": "^3.8",
+    "pestphp/pest": "^4.0",
     "phpstan/phpstan": "^2.1"
   },
   "autoload": {
