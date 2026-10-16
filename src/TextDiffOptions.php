@@ -25,9 +25,9 @@ final class TextDiffOptions
 
     private bool $ignoreTrailingWhitespace = false;
 
-    private int $maxLines = 50_000;
+    private int $maxLines = 20_000;
 
-    private int $maxInputBytes = 10_485_760;
+    private int $maxInputBytes = 4_194_304;
 
     private int $maxInlineLength = 1_000;
 
@@ -117,7 +117,10 @@ final class TextDiffOptions
     }
 
     /**
-     * The most lines either text may have (50,000 by default); longer texts throw
+     * The most lines either text may have (20,000 by default); longer texts throw
+     *
+     * The defaults keep the slowest case, two entirely different texts, to a few seconds and
+     * under 100 MB.
      */
     public function maxLines(int $lines): self
     {
@@ -130,7 +133,7 @@ final class TextDiffOptions
     }
 
     /**
-     * The most bytes either text may have (10 MiB by default); larger texts throw
+     * The most bytes either text may have (4 MiB by default); larger texts throw
      */
     public function maxInputBytes(int $bytes): self
     {

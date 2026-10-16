@@ -14,8 +14,8 @@ it('has documented defaults', function () {
         ->and($options->inlineMode())->toBe(InlineMode::WORD)
         ->and($options->ignoresWhitespaceChanges())->toBeFalse()
         ->and($options->ignoresTrailingWhitespace())->toBeFalse()
-        ->and($options->lineLimit())->toBe(50_000)
-        ->and($options->byteLimit())->toBe(10_485_760)
+        ->and($options->lineLimit())->toBe(20_000)
+        ->and($options->byteLimit())->toBe(4_194_304)
         ->and($options->inlineLengthLimit())->toBe(1_000);
 });
 
