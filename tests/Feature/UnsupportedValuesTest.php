@@ -11,10 +11,10 @@ it('rejects values it cannot compare', function (mixed $value, string $message) 
     expect(fn() => Diff::between(['a' => ['b' => 1]], ['a' => ['b' => $value]]))
         ->toThrow(UnsupportedValueException::class, $message);
 })->with([
-    'resource' => [fn() => STDIN, 'A value of type resource (stream) cannot be compared at path "a.b".'],
+    'resource' => [STDIN, 'A value of type resource (stream) cannot be compared at path "a.b".'],
     'closure' => [fn() => fn() => 1, 'A closure cannot be compared at path "a.b".'],
-    'generator' => [fn() => (fn() => yield 1)(), 'A generator cannot be compared at path "a.b".'],
-    'object' => [fn() => new ArrayObject(), 'An object of class ArrayObject cannot be compared without a normalizer at path "a.b".'],
+    'generator' => [(fn() => yield 1)(), 'A generator cannot be compared at path "a.b".'],
+    'object' => [new ArrayObject(), 'An object of class ArrayObject cannot be compared without a normalizer at path "a.b".'],
 ]);
 
 it('rejects unsupported added and removed values', function () {
