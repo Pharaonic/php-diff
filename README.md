@@ -22,21 +22,37 @@ composer require pharaonic/php-diff
 
 ## Usage
 
+### Compare two values
+
 ```php
 use Pharaonic\Diff\Diff;
-use Pharaonic\Diff\DiffOptions;
 
-$result = Diff::between($before, $after, DiffOptions::create()
-    ->identify('addresses', 'id')
-    ->ignore('updated_at')
-    ->redact('password'));
+$before = ['name' => 'Ali', 'age' => 30, 'phone' => '0100'];
+$after  = ['name' => 'Ali', 'age' => 31, 'email' => 'ali@example.com'];
 
-$result->wasModified('email');      // true when the email changed
-$result->hasChanged('addresses.0'); // true when anything in that address changed
-$result->toJson();                  // every change, with "[REDACTED]" instead of the password
+$result = Diff::between($before, $after);
+
+$result->wasModified('age');   // true
+$result->wasAdded('email');    // true
+$result->wasRemoved('phone');  // true
+$result->hasChanged('name');   // false
 ```
 
-For text, `Diff::text($old, $new)` gives the changed lines in hunks, with `toUnified()` for a patch that `git apply` accepts and `toHtml()` for a GitHub-style table.
+### Compare two texts
+
+```php
+echo Diff::text("apple\nbanana\ncherry\n", "apple\nblueberry\ncherry\n")->toUnified();
+```
+
+```diff
+--- before
++++ after
+@@ -1,3 +1,3 @@
+ apple
+-banana
++blueberry
+ cherry
+```
 
 ## Documentation
 
