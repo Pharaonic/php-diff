@@ -29,12 +29,12 @@
     "security": "https://github.com/Pharaonic/php-diff/security/policy"
   },
   "require": {
-    "php": ">=8.4 <8.5"
+    "php": ">=8.5 <8.6"
   },
   "require-dev": {
     "laravel/pint": "^1.20",
     "pestphp/pest": "^4.0",
-    "phpstan/phpstan": "^2.1"
+    "phpstan/phpstan": "^2.1.33"
   },
   "autoload": {
     "psr-4": {
