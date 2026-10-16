@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here.
 
+## 8.5.0 - Unreleased
+
+The `8.5.x` line targets PHP 8.5. Its public API and its output are identical to `8.4.0`.
+
+### Changed
+
+- **Requires PHP `>=8.5 <8.6`.** Use the `8.4.x` line on PHP 8.4.
+
 ## 8.4.0 - 2026-10-16
 
 The `8.4.x` line targets PHP 8.4. Its public API and its output are identical to `8.3.0`.
