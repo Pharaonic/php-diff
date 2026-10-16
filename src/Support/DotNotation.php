@@ -59,7 +59,7 @@ final class DotNotation
     public static function format(array $segments): string
     {
         return implode('.', array_map(
-            static fn (int|string $segment): string => addcslashes((string) $segment, '.*\\'),
+            static fn(int|string $segment): string => addcslashes((string) $segment, '.*\\'),
             $segments,
         ));
     }

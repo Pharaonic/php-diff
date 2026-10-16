@@ -15,7 +15,7 @@ use Pharaonic\Diff\TextDiffOptions;
 function pairs(string $old, string $new, ?TextDiffOptions $options = null): array
 {
     return array_map(
-        fn (ModifiedLinePair $pair) => $pair->removed()->oldLineNumber() . '->' . $pair->added()->newLineNumber(),
+        fn(ModifiedLinePair $pair) => $pair->removed()->oldLineNumber() . '->' . $pair->added()->newLineNumber(),
         Diff::text($old, $new, $options)->modifiedPairs(),
     );
 }
@@ -91,8 +91,8 @@ it('scores lines above the inline limit by their common prefix and suffix', func
 });
 
 it('stays fast and deterministic on large changes', function () {
-    $old = implode("\n", array_map(fn ($i) => "value {$i} = old", range(1, 300))) . "\n";
-    $new = implode("\n", array_map(fn ($i) => "value {$i} = new", range(1, 300))) . "\n";
+    $old = implode("\n", array_map(fn($i) => "value {$i} = old", range(1, 300))) . "\n";
+    $new = implode("\n", array_map(fn($i) => "value {$i} = new", range(1, 300))) . "\n";
     $start = microtime(true);
     $result = pairs($old, $new);
 

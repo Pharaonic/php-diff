@@ -13,9 +13,7 @@ final class Missing
 {
     private static ?self $instance = null;
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function value(): self
     {

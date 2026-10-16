@@ -22,7 +22,5 @@ final class ChangeType
 
     public const UNCHANGED = 'unchanged';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 }

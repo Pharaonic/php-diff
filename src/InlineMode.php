@@ -18,7 +18,5 @@ final class InlineMode
      */
     public const CHARACTER = 'character';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 }

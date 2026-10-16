@@ -14,7 +14,7 @@ use Pharaonic\Diff\TextDiffOptions;
 function ranges(string $old, string $new, int $context = 3): array
 {
     return array_map(
-        fn (Hunk $hunk) => sprintf('-%d,%d +%d,%d', $hunk->oldStart(), $hunk->oldLength(), $hunk->newStart(), $hunk->newLength()),
+        fn(Hunk $hunk) => sprintf('-%d,%d +%d,%d', $hunk->oldStart(), $hunk->oldLength(), $hunk->newStart(), $hunk->newLength()),
         Diff::text($old, $new, TextDiffOptions::create()->context($context))->hunks(),
     );
 }
@@ -24,7 +24,7 @@ function ranges(string $old, string $new, int $context = 3): array
  */
 function numbered(int ...$replaced): string
 {
-    return implode('', array_map(fn (int $i) => (in_array($i, $replaced, true) ? 'X' : (string) $i) . "\n", range(1, 20)));
+    return implode('', array_map(fn(int $i) => (in_array($i, $replaced, true) ? 'X' : (string) $i) . "\n", range(1, 20)));
 }
 
 // Expected ranges were taken from `git diff --no-index`.
@@ -51,7 +51,7 @@ it('has no hunks when nothing changed', function () {
 it('keeps the lines of each hunk in order', function () {
     $hunk = Diff::text(numbered(), numbered(10))->hunks()[0];
 
-    expect(array_map(fn ($line) => $line->content(), $hunk->lines()))->toBe(['7', '8', '9', '10', 'X', '11', '12', '13'])
+    expect(array_map(fn($line) => $line->content(), $hunk->lines()))->toBe(['7', '8', '9', '10', 'X', '11', '12', '13'])
         ->and($hunk->toArray())->toMatchArray(['old_start' => 7, 'old_length' => 7, 'new_start' => 7, 'new_length' => 7])
         ->and($hunk->toArray()['lines'][3])->toBe(['type' => 'removed', 'content' => '10', 'old_line' => 10, 'new_line' => null, 'inline' => []]);
 });

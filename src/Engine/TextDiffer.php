@@ -30,9 +30,7 @@ final class TextDiffer
 {
     private const NO_NEWLINE = "\0no newline";
 
-    public function __construct(private TextDiffOptions $options)
-    {
-    }
+    public function __construct(private TextDiffOptions $options) {}
 
     public function diff(string $before, string $after): TextDiffResult
     {
@@ -77,7 +75,7 @@ final class TextDiffer
         }
 
         $lines = $final;
-        $pairs = array_map(static fn (array $pair): ModifiedLinePair => new ModifiedLinePair($lines[$pair[0]], $lines[$pair[1]]), $found);
+        $pairs = array_map(static fn(array $pair): ModifiedLinePair => new ModifiedLinePair($lines[$pair[0]], $lines[$pair[1]]), $found);
 
         return new TextDiffResult(
             $lines,

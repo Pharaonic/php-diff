@@ -112,7 +112,7 @@ it('reports a record as both moved and modified', function () {
 });
 
 it('does not explode into moves when a record is inserted at the head of a long list', function () {
-    $before = array_map(fn (int $id) => ['id' => $id, 'name' => "user {$id}"], range(1, 1000));
+    $before = array_map(fn(int $id) => ['id' => $id, 'name' => "user {$id}"], range(1, 1000));
     $after = [['id' => 0, 'name' => 'new'], ...$before];
     $result = Diff::between($before, $after, DiffOptions::create()->identify('', 'id')->detectMoves());
 
@@ -120,7 +120,7 @@ it('does not explode into moves when a record is inserted at the head of a long 
 });
 
 it('does not explode into changes when an item is inserted at the head of a long list', function () {
-    $before = array_map(fn (int $id) => ['id' => $id, 'name' => "user {$id}"], range(1, 1000));
+    $before = array_map(fn(int $id) => ['id' => $id, 'name' => "user {$id}"], range(1, 1000));
 
     expect(summary(Diff::between($before, [['id' => 0], ...$before])))->toBe(['added 0']);
 });

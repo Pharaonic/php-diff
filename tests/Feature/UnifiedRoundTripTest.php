@@ -67,7 +67,7 @@ function generatedTexts(int $seed, int $count): array
 
     for ($i = 0; $i < $count; $i++) {
         $old = $text();
-        $new = mt_rand(0, 2) === 0 ? $text() : preg_replace_callback('/^.*$/m', fn ($m) => mt_rand(0, 4) === 0 ? $words[mt_rand(0, 8)] : $m[0], $old);
+        $new = mt_rand(0, 2) === 0 ? $text() : preg_replace_callback('/^.*$/m', fn($m) => mt_rand(0, 4) === 0 ? $words[mt_rand(0, 8)] : $m[0], $old);
         $pairs[] = [$old, (string) $new];
     }
 

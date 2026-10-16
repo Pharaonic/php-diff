@@ -23,9 +23,7 @@ final class DiffResult implements Countable, IteratorAggregate, JsonSerializable
      *
      * @internal Results are created by Diff::between().
      */
-    public function __construct(private array $changes)
-    {
-    }
+    public function __construct(private array $changes) {}
 
     public function hasChanges(): bool
     {
@@ -133,7 +131,7 @@ final class DiffResult implements Countable, IteratorAggregate, JsonSerializable
 
         return array_values(array_filter(
             $this->changes,
-            static fn (Change $change): bool => $change->path()->segments() === $segments,
+            static fn(Change $change): bool => $change->path()->segments() === $segments,
         ));
     }
 
@@ -148,7 +146,7 @@ final class DiffResult implements Countable, IteratorAggregate, JsonSerializable
 
         return array_values(array_filter(
             $this->changes,
-            static fn (Change $change): bool => self::within($change->oldPath(), $segments)
+            static fn(Change $change): bool => self::within($change->oldPath(), $segments)
                 || self::within($change->newPath(), $segments),
         ));
     }
@@ -185,7 +183,7 @@ final class DiffResult implements Countable, IteratorAggregate, JsonSerializable
      */
     public function toArray(): array
     {
-        return array_map(static fn (Change $change): array => $change->toArray(), $this->changes);
+        return array_map(static fn(Change $change): array => $change->toArray(), $this->changes);
     }
 
     /**
@@ -209,7 +207,7 @@ final class DiffResult implements Countable, IteratorAggregate, JsonSerializable
      */
     private function ofType(string $type): array
     {
-        return array_values(array_filter($this->changes, static fn (Change $change): bool => $change->type() === $type));
+        return array_values(array_filter($this->changes, static fn(Change $change): bool => $change->type() === $type));
     }
 
     private function exactly(string $type, string|Path $path): bool

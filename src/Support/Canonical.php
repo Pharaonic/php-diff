@@ -31,9 +31,7 @@ final class Canonical
      */
     private array $representatives = [];
 
-    public function __construct(private DiffOptions $options, private PathFilter $filter, private Objects $objects)
-    {
-    }
+    public function __construct(private DiffOptions $options, private PathFilter $filter, private Objects $objects) {}
 
     /**
      * The list strategy for a path and its identity keys; null as the strategy means identity.
@@ -147,7 +145,7 @@ final class Canonical
      */
     private function encodeMap(array $value, array $path, array $ancestors): string
     {
-        uksort($value, static fn (int|string $a, int|string $b): int => strcmp((string) $a, (string) $b));
+        uksort($value, static fn(int|string $a, int|string $b): int => strcmp((string) $a, (string) $b));
         $encoded = 'm{';
 
         foreach ($value as $key => $item) {

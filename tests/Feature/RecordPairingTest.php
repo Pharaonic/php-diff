@@ -39,8 +39,8 @@ it('pairs lists that share an item', function () {
 });
 
 it('only pairs records at the same position in very large replaced runs', function () {
-    $before = array_map(fn (int $i) => ['n' => $i, 'v' => 'old'], range(1, 150));
-    $after = array_map(fn (int $i) => ['n' => $i, 'v' => 'new'], range(1, 150));
+    $before = array_map(fn(int $i) => ['n' => $i, 'v' => 'old'], range(1, 150));
+    $after = array_map(fn(int $i) => ['n' => $i, 'v' => 'new'], range(1, 150));
     // Shift the new run by one unrelated record: positions no longer line up with their records.
     $shifted = [['other' => true], ...$after];
     $start = microtime(true);

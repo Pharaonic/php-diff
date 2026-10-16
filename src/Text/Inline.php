@@ -87,6 +87,6 @@ final class Inline
      */
     private static function build(array $pieces): array
     {
-        return array_map(static fn (array $piece): InlineSegment => new InlineSegment($piece[0], $piece[1]), $pieces);
+        return array_map(static fn(array $piece): InlineSegment => new InlineSegment($piece[0], $piece[1]), $pieces);
     }
 }

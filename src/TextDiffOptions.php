@@ -31,9 +31,7 @@ final class TextDiffOptions
 
     private int $maxInlineLength = 1_000;
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function create(): self
     {

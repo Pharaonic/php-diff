@@ -506,7 +506,7 @@ final class StructuredDiffer
         }
 
         if ($beforeIsList) {
-            $tokens = array_map(fn (mixed $item): string => $this->canonical->encode($item, []), $after);
+            $tokens = array_map(fn(mixed $item): string => $this->canonical->encode($item, []), $after);
 
             foreach ($before as $item) {
                 if (in_array($this->canonical->encode($item, []), $tokens, true)) {

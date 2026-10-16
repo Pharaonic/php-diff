@@ -27,8 +27,7 @@ final class TextDiffResult implements JsonSerializable
         private array $pairs,
         private bool $oldEndsWithNewline,
         private bool $newEndsWithNewline,
-    ) {
-    }
+    ) {}
 
     public function hasChanges(): bool
     {
@@ -131,8 +130,8 @@ final class TextDiffResult implements JsonSerializable
             'stats' => $this->stats(),
             'old_ends_with_newline' => $this->oldEndsWithNewline,
             'new_ends_with_newline' => $this->newEndsWithNewline,
-            'hunks' => array_map(static fn (Hunk $hunk): array => $hunk->toArray(), $this->hunks),
-            'modified' => array_map(static fn (ModifiedLinePair $pair): array => $pair->toArray(), $this->pairs),
+            'hunks' => array_map(static fn(Hunk $hunk): array => $hunk->toArray(), $this->hunks),
+            'modified' => array_map(static fn(ModifiedLinePair $pair): array => $pair->toArray(), $this->pairs),
         ];
     }
 
@@ -173,6 +172,6 @@ final class TextDiffResult implements JsonSerializable
      */
     private function ofType(string $type): array
     {
-        return array_values(array_filter($this->lines, static fn (DiffLine $line): bool => $line->type() === $type));
+        return array_values(array_filter($this->lines, static fn(DiffLine $line): bool => $line->type() === $type));
     }
 }

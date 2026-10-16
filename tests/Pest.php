@@ -13,7 +13,7 @@ use Pharaonic\Diff\DiffResult;
 function summary(DiffResult $result): array
 {
     return array_map(
-        static fn (Change $change): string => trim(sprintf('%s %s', $change->type(), $change->path()->toDot())) . ($change->isAggregate() ? ' [aggregate]' : ''),
+        static fn(Change $change): string => trim(sprintf('%s %s', $change->type(), $change->path()->toDot())) . ($change->isAggregate() ? ' [aggregate]' : ''),
         $result->changes(),
     );
 }
@@ -44,7 +44,7 @@ function textLines(Pharaonic\Diff\TextDiffResult $result): array
     $markers = ['unchanged' => ' ', 'removed' => '-', 'added' => '+'];
 
     return array_map(
-        static fn (Pharaonic\Diff\DiffLine $line): string => $markers[$line->type()] . $line->content(),
+        static fn(Pharaonic\Diff\DiffLine $line): string => $markers[$line->type()] . $line->content(),
         $result->lines(),
     );
 }

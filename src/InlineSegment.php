@@ -12,9 +12,7 @@ final class InlineSegment
     /**
      * @internal Segments are created by Diff::text().
      */
-    public function __construct(private string $type, private string $text)
-    {
-    }
+    public function __construct(private string $type, private string $text) {}
 
     /**
      * ChangeType::UNCHANGED, or ChangeType::REMOVED on a removed line and ChangeType::ADDED on an

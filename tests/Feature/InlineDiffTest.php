@@ -14,7 +14,7 @@ use Pharaonic\Diff\TextDiffOptions;
 function marked(DiffLine $line): string
 {
     return implode('', array_map(
-        fn (InlineSegment $s) => $s->type() === 'unchanged' ? $s->text() : "[{$s->text()}]",
+        fn(InlineSegment $s) => $s->type() === 'unchanged' ? $s->text() : "[{$s->text()}]",
         $line->inlineSegments(),
     ));
 }
@@ -61,8 +61,8 @@ it('splits each line into pieces that join back into it', function (string $mode
     $alphabet = ['a', 'b', ' ', '  ', '.', '(', ')', 'é', '👍', "\t", 'word'];
 
     for ($round = 0; $round < 100; $round++) {
-        $old = implode('', array_map(fn () => $alphabet[mt_rand(0, 10)], range(0, mt_rand(1, 12))));
-        $new = implode('', array_map(fn () => $alphabet[mt_rand(0, 10)], range(0, mt_rand(1, 12))));
+        $old = implode('', array_map(fn() => $alphabet[mt_rand(0, 10)], range(0, mt_rand(1, 12))));
+        $new = implode('', array_map(fn() => $alphabet[mt_rand(0, 10)], range(0, mt_rand(1, 12))));
 
         if ($old === $new) {
             continue;
@@ -71,7 +71,7 @@ it('splits each line into pieces that join back into it', function (string $mode
         $pair = Diff::text("{$old}\n", "{$new}\n", TextDiffOptions::create()->inline($mode)->similarityThreshold(0.0))->modifiedPairs()[0];
 
         foreach ([[$pair->removed(), 'removed'], [$pair->added(), 'added']] as [$line, $changed]) {
-            expect(implode('', array_map(fn (InlineSegment $s) => $s->text(), $line->inlineSegments())))->toBe($line->content());
+            expect(implode('', array_map(fn(InlineSegment $s) => $s->text(), $line->inlineSegments())))->toBe($line->content());
 
             foreach ($line->inlineSegments() as $segment) {
                 expect($segment->type())->toBeIn(['unchanged', $changed]);
@@ -84,7 +84,7 @@ it('merges neighbouring pieces of the same kind', function () {
     $segments = Diff::text("abc\n", "xyz\n", TextDiffOptions::create()->inline(InlineMode::CHARACTER)->similarityThreshold(0.0))
         ->modifiedPairs()[0]->added()->inlineSegments();
 
-    expect(array_map(fn (InlineSegment $s) => $s->toArray(), $segments))->toBe([['type' => 'added', 'text' => 'xyz']]);
+    expect(array_map(fn(InlineSegment $s) => $s->toArray(), $segments))->toBe([['type' => 'added', 'text' => 'xyz']]);
 });
 
 it('highlights by word by default', function () {
