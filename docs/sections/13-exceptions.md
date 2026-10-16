@@ -45,7 +45,7 @@ DiffOptions::create()->normalize('App\Missing', fn ($value) => $value);
 // InvalidArgumentException: The class or interface "App\Missing" does not exist.
 ```
 
-Paths with an empty segment, such as `users..1`, also throw an `InvalidArgumentException`, both in options and in result queries.
+Paths with an empty segment, such as `users..1`, also throw an `InvalidArgumentException`, both in options and in result queries. So does a `toUnified()` label with a line ending in it, which would break the patch.
 
 ### JSON
 

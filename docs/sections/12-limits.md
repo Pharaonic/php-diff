@@ -45,6 +45,7 @@ Typical inputs, like an edited file or a changed record, take milliseconds. The 
 
 - **Text alignment** uses the linear-space Myers algorithm, as Git does. On very different texts, it stops searching for the shortest diff after a cost limit, again as Git does, and returns a valid diff that may be slightly longer than the shortest one.
 - **Modified line pairing** skips pairs whose shared words already rule them out, before comparing them in full.
+- **Objects in lists** that a comparator handles are matched by calling the comparator against each different object already seen in that diff, so a list of 3,000 different objects takes about half a second. For large lists, a normalizer is faster: its values are matched directly.
 - **Record pairing** in a sequence list compares every removed record with every added one, up to 10,000 comparisons per replaced run. Larger runs pair records at the same position only.
 - **Text lines** are turned into numbers once, one per distinct line, so the alignment compares integers instead of strings, however long the lines are.
 

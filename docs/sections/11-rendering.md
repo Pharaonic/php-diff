@@ -22,7 +22,7 @@ echo Diff::text($old, $new)->toUnified('a/config/app.php', 'b/config/app.php');
 \ No newline at end of file
 ```
 
-The two labels default to `before` and `after`. Every line of the output ends with `"\n"`, whatever line endings the texts used.
+The two labels default to `before` and `after`, and cannot contain a line ending. Every line of the output ends with `"\n"`, whatever line endings the texts used.
 
 The output is a valid patch: `git apply` and `patch` apply it to the old text and give back the new one, including the `\ No newline at end of file` markers. With `context(0)`, pass `--unidiff-zero` to `git apply`, as Git requires for patches without context.
 

@@ -59,23 +59,29 @@ Diff::between(['price' => new Money(100, 'EGP')], ['price' => new Money(150, 'EG
 
 A pair that is not equal is reported as one `modified` change and is never compared further. Both objects must be instances of the comparator's class; otherwise it does not apply.
 
+Inside lists, objects that the comparator finds equal are matched with each other, and as identity keys they count as the same identity. This expects the comparator to behave like equality: if `a` equals `b`, then `b` equals `a`, and if `b` also equals `c`, then `a` equals `c`.
+
 ### Which Rule Applies
 
 For each object, the diff uses the first rule that matches:
 
 1. A comparator you registered, the last one added first.
-2. The built-in `DateTimeInterface` comparator.
-3. A normalizer you registered, the last one added first.
+2. A normalizer you registered, the last one added first.
+3. The built-in `DateTimeInterface` comparison.
 4. `jsonSerialize()` for `JsonSerializable`.
 5. Public properties for `stdClass`.
 
-So a comparator for `DateTimeInterface` replaces the built-in date rule, and a normalizer for a `JsonSerializable` class replaces `jsonSerialize()`. A normalizer for `DateTimeInterface` has no effect, because the built-in comparator handles dates first. To compare dates by day, register a comparator:
+Anything you register wins over the built-in rules. To compare dates by day, register either one:
 
 ```php
+// Report the date as one modified value.
 DiffOptions::create()->compare(
     DateTimeInterface::class,
     fn (DateTimeInterface $a, DateTimeInterface $b) => $a->format('Y-m-d') === $b->format('Y-m-d'),
 );
+
+// Store and report the dates as 'Y-m-d' strings.
+DiffOptions::create()->normalize(DateTimeInterface::class, fn (DateTimeInterface $date) => $date->format('Y-m-d'));
 ```
 
 :::warning Objects That Contain Themselves
