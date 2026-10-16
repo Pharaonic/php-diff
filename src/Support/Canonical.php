@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pharaonic\Diff\Support;
 
+use Closure;
 use DateTimeInterface;
 use Pharaonic\Diff\DiffOptions;
 use Pharaonic\Diff\Exceptions\MaximumDepthExceededException;
@@ -15,12 +16,21 @@ use Pharaonic\Diff\Path;
  * Encodes a value as a string that two values share exactly when no change would be reported
  * between them: map key order is ignored, NAN equals NAN, -0.0 equals 0.0, values at ignored
  * paths are left out, and so is the order of unordered lists and of identified lists when moves
- * are not detected. Used to align list items and to compare identities.
+ * are not detected. Objects a comparator claims share a string when the comparator finds them
+ * equal, which assumes it treats equality as symmetric and transitive. Used to align list items
+ * and to compare identities.
  *
  * @internal
  */
 final class Canonical
 {
+    /**
+     * Objects seen so far that no earlier one equals, by comparator position
+     *
+     * @var array<int, list<object>>
+     */
+    private array $representatives = [];
+
     public function __construct(private DiffOptions $options, private PathFilter $filter, private Objects $objects)
     {
     }
@@ -50,15 +60,10 @@ final class Canonical
     public function encode(mixed $value, array $path, array $ancestors = []): string
     {
         if (is_object($value)) {
-            $comparedAs = $this->objects->comparedAs($value);
+            $claim = $this->objects->claim($value);
 
-            if ($comparedAs === DateTimeInterface::class && $value instanceof DateTimeInterface) {
-                return 'd' . $value->format('U.u') . ';';
-            }
-
-            if ($comparedAs !== null) {
-                // Only the comparator knows when two such objects are equal.
-                return 'o' . spl_object_id($value) . ';';
+            if ($claim !== null) {
+                return $this->encodeCompared($value, ...$claim);
             }
 
             foreach ($ancestors as $ancestor) {
@@ -154,6 +159,29 @@ final class Canonical
         }
 
         return $encoded . '}';
+    }
+
+    /**
+     * Encode an object a comparator claims: dates of the built-in comparator by instant, other
+     * objects by the first object seen before that the comparator finds equal to them
+     */
+    private function encodeCompared(object $value, int $index, Closure $equals): string
+    {
+        if ($value instanceof DateTimeInterface && $this->objects->isBuiltInDate($index)) {
+            return 'd' . $value->format('U.u') . ';';
+        }
+
+        $representatives = $this->representatives[$index] ?? [];
+
+        foreach ($representatives as $id => $representative) {
+            if ($equals($representative, $value) === true) {
+                return 'o' . $index . ':' . $id . ';';
+            }
+        }
+
+        $this->representatives[$index][] = $value;
+
+        return 'o' . $index . ':' . count($representatives) . ';';
     }
 
     private static function float(float $value): string

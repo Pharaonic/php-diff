@@ -17,9 +17,9 @@ use stdClass;
  * object is normalized into a scalar, null or array by a registered normalizer, jsonSerialize()
  * or, for stdClass, its public properties.
  *
- * The last comparator or normalizer registered for a matching class wins. The built-in
- * DateTimeInterface comparator treats two dates as equal when they are the same instant, to the
- * microsecond, whatever their time zones.
+ * The last comparator or normalizer registered for a matching class wins, and anything registered
+ * wins over the built-in DateTimeInterface comparator, which treats two dates as equal when they
+ * are the same instant, to the microsecond, whatever their time zones.
  *
  * @internal
  */
@@ -51,9 +51,9 @@ final class Objects
             return null;
         }
 
-        foreach ($this->comparators as [$class, $comparator]) {
+        foreach ($this->comparators as $index => [$class, $comparator]) {
             if ($before instanceof $class && $after instanceof $class) {
-                return $comparator;
+                return $this->isBuiltInDate($index) && ($this->isNormalized($before) || $this->isNormalized($after)) ? null : $comparator;
             }
         }
 
@@ -61,17 +61,49 @@ final class Objects
     }
 
     /**
-     * The class of the comparator that claims an object, or null when it is normalized
+     * Whether a comparator claims an object, so it is compared as it is instead of normalized
      */
-    public function comparedAs(object $value): ?string
+    public function isCompared(object $value): bool
     {
-        foreach ($this->comparators as [$class]) {
+        return $this->claim($value) !== null;
+    }
+
+    /**
+     * The position and the callback of the comparator that claims an object, or null
+     *
+     * @return array{int, Closure}|null
+     */
+    public function claim(object $value): ?array
+    {
+        foreach ($this->comparators as $index => [$class, $comparator]) {
             if ($value instanceof $class) {
-                return $class;
+                return $this->isBuiltInDate($index) && $this->isNormalized($value) ? null : [$index, $comparator];
             }
         }
 
         return null;
+    }
+
+    /**
+     * Whether the comparator at this position is the built-in DateTimeInterface one
+     */
+    public function isBuiltInDate(int $index): bool
+    {
+        return $index === count($this->comparators) - 1;
+    }
+
+    /**
+     * Whether a registered normalizer handles an object
+     */
+    private function isNormalized(object $value): bool
+    {
+        foreach ($this->normalizers as [$class]) {
+            if ($value instanceof $class) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -84,7 +116,7 @@ final class Objects
     {
         $chain = [];
 
-        while (is_object($value) && $this->comparedAs($value) === null) {
+        while (is_object($value) && ! $this->isCompared($value)) {
             foreach ($chain as $previous) {
                 if ($previous === $value) {
                     throw UnsupportedValueException::circular(Path::fromSegments($path), $value);

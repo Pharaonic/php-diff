@@ -134,7 +134,7 @@ final class StructuredDiffer
      */
     private function enter(mixed $value, array $path, array &$ancestors): mixed
     {
-        if (! is_object($value) || $this->objects->comparedAs($value) !== null) {
+        if (! is_object($value) || $this->objects->isCompared($value)) {
             return $value;
         }
 

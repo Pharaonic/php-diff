@@ -60,7 +60,7 @@ final class Snapshot
      */
     private function prepare(mixed $value, array $path, array $ancestors): mixed
     {
-        if (is_object($value) && $this->objects->comparedAs($value) === null) {
+        if (is_object($value) && ! $this->objects->isCompared($value)) {
             foreach ($ancestors as $ancestor) {
                 if ($ancestor === $value) {
                     throw UnsupportedValueException::circular(Path::fromSegments($path), $value);

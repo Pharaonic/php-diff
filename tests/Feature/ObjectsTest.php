@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Pharaonic\Diff\Diff;
 use Pharaonic\Diff\DiffOptions;
 use Pharaonic\Diff\Exceptions\UnsupportedValueException;
+use Pharaonic\Diff\ListStrategy;
 use Pharaonic\Diff\Tests\Fixtures\Money;
 use Pharaonic\Diff\Tests\Fixtures\Payload;
 
@@ -166,4 +167,67 @@ it('matches identities inside normalized records', function () {
     $after = [new Payload(['id' => 2, 'v' => 1]), new Payload(['id' => 1, 'v' => 2])];
 
     expect(summary(Diff::between($before, $after, DiffOptions::create()->identify('', 'id'))))->toBe(['modified 1 [aggregate]', 'modified 1.v']);
+});
+
+it('aligns lists of objects a comparator finds equal', function () {
+    $options = DiffOptions::create()->compare(Money::class, fn (Money $a, Money $b) => $a->cents === $b->cents);
+
+    $result = Diff::between(
+        ['prices' => [new Money(100, 'EGP'), new Money(200, 'EGP')]],
+        ['prices' => [new Money(50, 'EGP'), new Money(100, 'USD'), new Money(200, 'USD')]],
+        $options,
+    );
+
+    expect(summary($result))->toBe(['modified prices [aggregate]', 'added prices.0']);
+});
+
+it('matches objects a comparator finds equal in unordered lists', function () {
+    $options = DiffOptions::create()
+        ->compare(Money::class, fn (Money $a, Money $b) => $a->cents === $b->cents)
+        ->listStrategy('prices', ListStrategy::UNORDERED);
+
+    $result = Diff::between(
+        ['prices' => [new Money(100, 'EGP'), new Money(200, 'EGP')]],
+        ['prices' => [new Money(200, 'EGP'), new Money(100, 'EGP')]],
+        $options,
+    );
+
+    expect($result->hasChanges())->toBeFalse();
+});
+
+it('matches identities that a comparator finds equal', function () {
+    $options = DiffOptions::create()
+        ->compare(Money::class, fn (Money $a, Money $b) => $a->cents === $b->cents)
+        ->identify('rows', 'price');
+
+    $result = Diff::between(
+        ['rows' => [['price' => new Money(100, 'EGP'), 'qty' => 1]]],
+        ['rows' => [['price' => new Money(100, 'EGP'), 'qty' => 2]]],
+        $options,
+    );
+
+    expect(summary($result))->toBe(['modified rows [aggregate]', 'modified rows.0 [aggregate]', 'modified rows.0.qty']);
+});
+
+it('applies a date comparator when aligning lists', function () {
+    $options = DiffOptions::create()
+        ->compare(DateTimeInterface::class, fn (DateTimeInterface $a, DateTimeInterface $b) => $a->format('Y-m-d') === $b->format('Y-m-d'))
+        ->listStrategy('days', ListStrategy::UNORDERED);
+
+    $result = Diff::between(
+        ['days' => [new DateTime('2026-01-01 10:00'), new DateTime('2026-01-02 10:00')]],
+        ['days' => [new DateTime('2026-01-02 11:00'), new DateTime('2026-01-01 11:00')]],
+        $options,
+    );
+
+    expect($result->hasChanges())->toBeFalse();
+});
+
+it('lets a normalizer override the built-in date comparison', function () {
+    $options = DiffOptions::create()->normalize(DateTimeInterface::class, fn (DateTimeInterface $date) => $date->format('Y-m-d'));
+
+    $result = Diff::between(['at' => new DateTime('2026-01-01 10:00')], ['at' => new DateTime('2026-01-02 11:00')], $options);
+
+    expect(Diff::between(new DateTime('2026-01-01 10:00'), new DateTime('2026-01-01 11:00'), $options)->hasChanges())->toBeFalse()
+        ->and($result->at('at')[0]->newValue())->toBe('2026-01-02');
 });

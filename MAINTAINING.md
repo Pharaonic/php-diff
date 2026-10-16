@@ -20,6 +20,7 @@ One branch per PHP minor, each requiring exactly that minor (`"php": ">=8.0 <8.1
 - Scalar comparison is strict, map key order is ignored, list order matters by default, and a missing value differs from `null`.
 - Every existing ancestor of a changed value is reported as an aggregate `modified` change; the root never is. A wholly added or removed subtree is one change.
 - `hasChanged()` matches the path and its descendants by segment; `wasAdded()`, `wasRemoved()` and `wasModified()` match the exact path; `wasMoved()` matches the old or the new path.
+- Registered comparators, then registered normalizers, win over the built-in rules (dates by instant, `jsonSerialize()`, `stdClass`). Objects a comparator finds equal match each other inside lists and as identity keys.
 - Options are immutable. Redaction happens before a value is stored in a result, including inside aggregate and subtree values.
 - Text diffs keep the low-level `added`/`removed`/`unchanged` lines; modified-line pairing is a layer on top. Unified output must apply with `git apply` and `patch`.
 - Every exception implements `Exceptions\DiffException`. Everything marked `@internal` may change in any release.
