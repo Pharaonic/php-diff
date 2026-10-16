@@ -53,6 +53,9 @@ echo Diff::text("apple\nbanana\ncherry\n", "apple\nblueberry\ncherry\n")->toUnif
 +blueberry
  cherry
 ```
+## Guide
+
+[How to Compare Nested Arrays in PHP: Beyond `array_diff()`](https://pharaonic.dev/guides/php/compare-nested-arrays)
 
 ## Documentation
 
