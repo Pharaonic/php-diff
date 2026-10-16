@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## 8.3.0 - Unreleased
+## 8.3.0 - 2026-10-16
 
 The `8.3.x` line targets PHP 8.3. Its public API and its output are identical to `8.2.0`.
 
